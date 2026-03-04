@@ -5427,7 +5427,7 @@ Hooks:Add("LocalizationManagerPostInit", "SC_Localization_Skills", function(loc)
 
 				--Transporter
 				["menu_pack_mule_beta_sc"] = "Transporter",
-				["menu_transporter_beta_desc_sc"] = "BÁSICA: #{owned}#$basic##\nPor cada #{skill_color}#10## puntos de blindaje, la penalización de movimiento al llevar bolsas en tu espalda es reducida un #{skill_color}#$skill_value_b1.##\n\nAS: #{owned}#$pro##\nPuedes esprintar con cualquier bolsa.\n\n#{risk}#NOTA: La penalización de movimiento sigue aplicando.##",
+				["menu_transporter_beta_desc_sc"] = "BÁSICA: #{owned}#$basic##\nPor cada #{skill_color}#10## puntos de blindaje, la penalización de movimiento al llevar bolsas en tu espalda es reducida un #{skill_color}#$skill_value_b1.##\n\nACE: #{owned}#$pro##\nYour max bag carry weight is increased by #{skill_color}#$skill_value_p2.##\n\n#{risk}#NOTE: The default carry weight is 30, and the movement penalty from the bag still applies.##",
 
 				--More Blood to Bleed--
 				["menu_iron_man_beta_sc"] = "Más Sangre para Derramar",
@@ -5496,7 +5496,7 @@ Hooks:Add("LocalizationManagerPostInit", "SC_Localization_Skills", function(loc)
 			--[[   BREACHER SUBTREE   ]]--
 				--Silent Drilling--
 				["menu_hardware_expert_beta_sc"] = "Experto en Herramientas",
-				["menu_hardware_expert_beta_desc_sc"] = "BÁSICA: #{owned}#$basic##\nTus #{skill_color}#taladros y sierras no emiten ruido##, civiles y guardias deben verlos para alertarse.\n\nAS: #{owned}#$pro##\nArreglas taladros y sierras un #{skill_color}#$skill_value_p1## más rápido.",
+				["menu_hardware_expert_beta_desc_sc"] = "BÁSICA: #{owned}#$basic##\nTus #{skill_color}#taladros y sierras no emiten ruido##, civiles y guardias deben verlos para alertarse.\n\nArreglas taladros y sierras un #{skill_color}#$skill_value_p1## más rápido.\n\nAS: #{owned}#$pro##\nArreglas taladros y sierras un #{skill_color}#$skill_value_p2## más rápido.",
 
 				--Demoman
 				["menu_trip_mine_expert_beta_sc"] = "Demoman",
@@ -5508,7 +5508,7 @@ Hooks:Add("LocalizationManagerPostInit", "SC_Localization_Skills", function(loc)
 
 				--Fire Trap--
 				["menu_more_fire_power_sc"] = "Trampas Incendiarias",
-				["menu_more_fire_power_desc_sc"] = "BÁSICA: #{owned}#$basic##\nTus minas sensor dispersan fuego al detonar por #{skill_color}#10## segundos en un radio de #{skill_color}#7.5## metros.\n\nEl fuego producido por las minas no inflige daño a jugadores o aliados.\n\nAS: #{owned}#$pro##\nPuedes desplegar #{skill_color}#10## minas sensor.\n\nTus minas infligen #{skill_color}#50%## de daño extra.",
+				["menu_more_fire_power_desc_sc"] = "BÁSICA: #{owned}#$basic##\nPuedes desplegar #{skill_color}#skill_value_p1## minas sensor.\n\nTus minas sensor dispersan fuego al detonar por #{skill_color}#10## segundos en un radio de #{skill_color}#7.5## metros.\n\nEl fuego producido por las minas no inflige daño a jugadores o aliados.\n\nAS: #{owned}#$pro##\nPuedes desplegar #{skill_color}#skill_value_p2## minas sensor.\n\nTus minas infligen #{skill_color}#50%## de daño extra.",
 
 				--Expert Hardware
 				["menu_kick_starter_beta_sc"] = "Hardware Experto",

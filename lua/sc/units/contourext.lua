@@ -22,38 +22,63 @@ ContourExt._types.deployable_blackout = { --for autumn's deployable disabling ab
 	priority = 1,
 	color = Vector3(0.5,0,1)
 }
-ContourExt._types.mark_enemy_sixth_sense = { -- 6th sense still will be useful with new PJ contours changes
+-- Equivalent to mark_enemy except in priority (and Pro Jobs not enabling ray_check_reverse for it).
+ContourExt._types.mark_enemy_through_walls = {
 	fadeout = 4.5,
 	priority = 5,
 	material_swap_required = true,
 	fadeout_silent = 13.5,
-	--trigger_marked_event = true,
+	trigger_marked_event = true,
 	color = tweak_data.contour.character.dangerous_color
 }
-ContourExt._types.mark_enemy.priority = 6 -- Need lower priority for new 6th sense outline
+ContourExt._types.mark_enemy.priority = 6 -- Lower priority for mark_enemy so that mark_enemy_through_walls can overwrite it.
+
+-- The distance-based marking contours now no longer give a default damage bonus.
+-- Meanwhile, the non-distance based ones now give a damage bonus on distance too.
+-- For the why, see PlayerManager:get_contour_for_marked_enemy().
+ContourExt._types.mark_unit_dangerous_damage_bonus.damage_bonus_distance = 1
+ContourExt._types.mark_unit_dangerous_damage_bonus_distance.damage_bonus = nil
+ContourExt._types.mark_enemy_damage_bonus.damage_bonus_distance = 1
+ContourExt._types.mark_enemy_damage_bonus_distance.damage_bonus = nil
+
+table.insert(ContourExt.indexed_types, "mark_enemy_through_walls")
+
+if #ContourExt.indexed_types > 128 then
+	Application:error("[ContourExt] max # contour presets exceeded!")
+end
 
 -- PJ modifier: Marked enemy will show contour only in LoS (unless you using any marking skills); Medic and LPF flash outlines are disabled;
 if is_pro_job then
 	ContourExt._types.mark_enemy.ray_check_reverse = true
-	--ContourExt._types.mark_unit.ray_check_reverse = true
+	ContourExt._types.mark_unit.ray_check_reverse = true
 	ContourExt._types.medic_show.color = Vector3(0,0,0)
 	ContourExt._types.medic_show.priority = 10
 	ContourExt._types.omnia_heal.color = Vector3(0,0,0)
 	ContourExt._types.omnia_heal.priority = 10
 end
 
-Hooks:OverrideFunction(ContourExt, "add", function(self,type, sync, multiplier, override_color, is_element)
-local disable_outlines = managers.mutators:modify_value("ContourExt:DisableOutlines", false)
-local do_outline = true
 local enemy_contours = {
 	"friendly",
 	"mark_enemy",
+	"mark_enemy_through_walls",
 	"mark_enemy_damage_bonus",
 	"mark_enemy_damage_bonus_distance",
 	"mark_unit_dangerous",
 	"mark_unit_dangerous_damage_bonus",
 	"mark_unit_dangerous_damage_bonus_distance"
 }
+
+local deployable_contours = {
+	"deployable_selected",
+	"deployable_disabled",
+	"deployable_active",
+	"deployable_interactable"
+}
+
+Hooks:OverrideFunction(ContourExt, "add", function(self, type, sync, multiplier, override_color, is_element)
+local disable_outlines = managers.mutators:modify_value("ContourExt:DisableOutlines", false)
+local do_outline = true
+
 if disable_outlines then
 	do_outline = false
 	local disable_enemy_outlines = managers.mutators:modify_value("ContourExt:DisableEnemyOutlines", false)
@@ -64,11 +89,23 @@ if disable_outlines then
 			end	
 		end		
 	end
+	
+	local disable_deployable_outlines = managers.mutators:modify_value("ContourExt:DeployableOutlinesCheck", false)
+	if disable_outlines and not disable_deployable_outlines then
+		for _, deployable_contour in ipairs(deployable_contours) do
+			if type == deployable_contour then
+				do_outline = true
+			end	
+		end		
+	end
 end
 
 if do_outline then
 	self._contour_list = self._contour_list or {}
 	local data = self._types[type]
+	
+	if not data then return end
+
 	local fadeout = data.fadeout
 
 	if data.fadeout_silent and managers.groupai:state():whisper_mode() then
@@ -358,10 +395,11 @@ else -- for Smooth Contours
 			local data = setup.data
 			local is_current = index == 1
 			local opacity = nil
+			local turn_off = nil
 			if is_current and data.ray_check then
 				local turn_on = nil
 				local cam_pos = managers.viewport:get_current_camera_position()
-				if cam_pos then
+				if cam_pos and alive(unit) then
 					turn_on = mvector3.distance_sq(cam_pos, unit:movement():m_com()) > 16000000
 					turn_on = turn_on or unit:raycast("ray", unit:movement():m_com(), cam_pos, "slot_mask", self._slotmask_world_geometry, "report")
 				end
@@ -377,7 +415,7 @@ else -- for Smooth Contours
 			if is_current and data.ray_check_reverse and not managers.groupai:state():whisper_mode() then
 				local turn_on = nil
 				local cam_pos = managers.viewport:get_current_camera_position()
-				if cam_pos then
+				if cam_pos and alive(unit) then
 					turn_on = mvector3.distance_sq(cam_pos, unit:movement():m_com()) > 16000000
 					turn_on = turn_on or unit:raycast("ray", unit:movement():m_com(), cam_pos, "slot_mask", self._slotmask_world_geometry, "report")
 				end
@@ -407,7 +445,6 @@ else -- for Smooth Contours
 			elseif is_current and setup.fadeout_start_t then
 				opacity = (t - setup.fadeout_start_t) / setup.fadeout_length
 				opacity = 1 - math.max(opacity, 0)
-				
 			end
 			
 			

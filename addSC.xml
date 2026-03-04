@@ -77,13 +77,16 @@
 	<texture			path="guis/textures/pd2/skilltree/info_grinder" force="false" load="false"/>
 	<texture			path="guis/textures/pd2/skilltree/info_infiltrator" force="false" load="false"/>
 	<texture			path="guis/textures/pd2/skilltree/info_sociopath" force="false" load="false"/>
+	<texture			path="guis/textures/pd2/skilltree/info_gambler" force="false" load="false"/>
 	<texture			path="guis/textures/pd2/skilltree/info_body_expertise" force="false" load="false"/>
 	<texture			path="guis/textures/pd2/skilltree/info_long_dis_revive" force="false" load="false"/> <!-- inspire -->
-	<texture			path="guis/textures/pd2/skilltree/info_hostage_taker" force="false" load="false"/> <!-- inspire -->
+	<texture			path="guis/textures/pd2/skilltree/info_hostage_taker" force="false" load="false"/>
+	<texture			path="guis/textures/pd2/skilltree/info_uppers" force="false" load="false"/>
 	<texture			path="guis/textures/pd2/skilltree/info_messiah" force="false" load="false"/>
 	<texture			path="guis/textures/pd2/skilltree/info_overkill_damage_multiplier" force="false" load="false"/>
 	<texture			path="guis/textures/pd2/skilltree/info_revived_damage_reduction" force="false" load="false"/> <!-- Painkillers -->
 	<texture			path="guis/textures/pd2/skilltree/info_first_aid_damage_reduction" force="false" load="false"/> <!-- Quick Fix -->
+	<texture			path="guis/textures/pd2/skilltree/info_bullseye" force="false" load="false"/> 
 	<texture			path="guis/textures/pd2/skilltree/info_rogue" force="false" load="false"/>
 	<texture			path="guis/textures/pd2/skilltree/info_crook" force="false" load="false"/>
 	<texture			path="guis/textures/pd2/skilltree/info_crew_chief" force="false" load="false"/>
@@ -95,6 +98,9 @@
 	<texture			path="guis/textures/pd2/skilltree/info_doctor_bag_health_regen" force="false" load="false"/>
 	<texture			path="guis/textures/pd2/skilltree/info_survive_one_hit" force="false" load="false"/> <!-- Yakuza Oni Irezumi -->
 	<texture			path="guis/textures/pd2/skilltree/info_sneaky_bastard" force="false" load="false"/>
+	<texture			path="guis/textures/pd2/skilltree/info_cohesion" force="false" load="false"/>
+	<texture			path="guis/textures/pd2/skilltree/info_heisters_in_aura" force="false" load="false"/>
+	<texture			path="guis/textures/pd2/skilltree/info_dig_in_your_heels" force="false" load="false"/>
 
 
 	<model				path="units/payday2/props/str_prop_alley_trash_container/str_prop_alley_trash_container" force="true"/>
@@ -276,7 +282,7 @@
 	<sequence_manager	path="units/pd2_dlc_jolly/equipment/gen_interactable_saw/gen_interactable_saw" force="true"/>
 	<world				path="levels/narratives/classics/man/world" force="true"/>
 
-	
+		
 	<!--PANIC ROOM-->
 	<mission			path="levels/narratives/classics/flat/world/world" force="true" unload="true"/>
 	<continent			path="levels/narratives/classics/flat/world/world" force="true" unload="true"/>
@@ -425,9 +431,6 @@
 
 	<unit				path="units/payday2/characters/ene_cop_2_forest/ene_cop_2_forest" load="true"/>
     <unit				path="units/payday2/characters/ene_cop_2_forest/ene_cop_2_forest_husk" load="true"/>
-	
-	<!--Parachute Collision edit (No more Boiling Point suicides)-->
-	<object				path="units/pd2_dlc_jerry/props/jry_equipment_parachute/jry_equipment_parachute_ragdoll" force="true"/>
 		
 	<!--Change to Armored Hector's Visor Texture (now uses the Hard Hat's visor texture, for consistency reasons.)-->
 	<material_config	path="units/pd2_mcmansion/characters/ene_male_hector_1/ene_male_hector_1" force="true" />
@@ -444,10 +447,10 @@
 	<sequence_manager	path="units/payday2/characters/ene_spook_1/ene_spook_1" force="true" />
 	<object				path="units/payday2/characters/ene_spook_1/ene_spook_1" force="true"/>
 	
-	<texture			path="units/payday2/characters/shared_textures/swat_body_df" />
-	<texture			path="units/payday2/characters/shared_textures/swat_body_nm" />
-	<texture			path="units/payday2/characters/shared_textures/spook_heavy_df" />
-	<texture			path="units/payday2/characters/shared_textures/spook_heavy_nm" />
+	<texture			path="units/payday2/characters/shared_textures/swat_atlas_df" />
+	<texture			path="units/payday2/characters/shared_textures/swat_atlas_nm" />
+	<texture			path="units/payday2/characters/shared_textures/spook_atlas_df" />
+	<texture			path="units/payday2/characters/shared_textures/spook_atlas_nm" />
 	
 	<material_config	path="units/payday2/characters/ene_swat_1_sc/ene_swat_1_sc" />
 	<material_config	path="units/payday2/characters/ene_swat_1_sc/ene_swat_1_sc_contour" />
@@ -483,7 +486,8 @@
 
 	
 	<!-- secs -->
-	<unit				path="units/payday2/characters/ene_security_1/ene_security_1" force="true"/>
+	<!-- Disabling for now, the game does *not* like them being loaded like this t. SC -->
+	<!--unit				path="units/payday2/characters/ene_security_1/ene_security_1" force="true"/>
 	<unit				path="units/payday2/characters/ene_security_1/ene_security_1_husk" force="true"/>
 	<material_config	path="units/payday2/characters/ene_security_1/ene_security_1"/>
 	<material_config	path="units/payday2/characters/ene_security_1/ene_security_1_contour"/>
@@ -506,7 +510,7 @@
 	<unit				path="units/payday2/characters/ene_security_6/ene_security_6_husk" force="true"/>
 	
 	<unit				path="units/payday2/characters/ene_security_7/ene_security_7" force="true"/>
-	<unit				path="units/payday2/characters/ene_security_7/ene_security_7_husk" force="true"/>
+	<unit				path="units/payday2/characters/ene_security_7/ene_security_7_husk" force="true"--/>
 
 	<!-- murkywater -->
 	<unit				path="units/payday2/characters/ene_murkywater_1/ene_murkywater_1" force="true" load="true"/>
@@ -1276,18 +1280,20 @@
 	<effect				path="effects/particles/weapons/sniper_trail_sc" force="false"/>
 	<effect				path="effects/particles/weapons/titan_trail_sc" force="false"/>
 	<effect				path="effects/particles/weapons/akan_titan_trail_sc" force="false"/>
-	<texture			path="effects/textures/e_sniper_trail_df" />
-	<texture			path="effects/textures/e_sniper_trail_1_df" />
-	<texture			path="effects/textures/e_sniper_trail_2_df" />
-	<texture			path="effects/textures/e_sniper_trail_3_df" />
-	<texture			path="effects/textures/e_sniper_trail_4_df" />
-	<texture			path="effects/textures/e_sniper_trail_5_df" />
+	<texture			path="effects/textures/e_sniper_trail_df"/>
+	<texture			path="effects/textures/e_sniper_trail_1_df"/>
+	<texture			path="effects/textures/e_sniper_trail_2_df"/>
+	<texture			path="effects/textures/e_sniper_trail_3_df"/>
+	<texture			path="effects/textures/e_sniper_trail_4_df"/>
+	<texture			path="effects/textures/e_sniper_trail_5_df"/>
 	<effect				path="effects/particles/weapons/vapor_trail_1" force="false"/>
 	<effect				path="effects/particles/weapons/vapor_trail_2" force="false"/>
 	<effect				path="effects/particles/weapons/vapor_trail_3" force="false"/>
 	<effect				path="effects/particles/weapons/vapor_trail_4" force="false"/>
 	<effect				path="effects/particles/weapons/vapor_trail_5" force="false"/>
 	<effect				path="effects/particles/weapons/vapor_trail_sc" force="false"/>
+	<effect				path="effects/particles/weapons/laser_trail_muzzle" force="false"/>
+	<effect				path="effects/particles/weapons/laser_trail_vector2" force="false"/>
 	
 	<!--Remove tracer sparks from hornet GL ammo-->
 	<effect				path="effects/payday2/particles/weapons/shotgun/sho_muzzleflash_hornet" load="false"/>
@@ -1296,6 +1302,8 @@
     <effect				path="_dmc/effects/shell_lmg_down" force="false" load="true" unload="true" reload="true"/>
     <effect				path="_dmc/effects/shell_shak_smol" force="false" load="true" unload="true" reload="true"/>
     <effect				path="_dmc/effects/shell_shak_sniper" force="false" load="true" unload="true" reload="true"/>
+    <effect				path="_dmc/effects/shell_sniper_m95_semi" force="false" load="true" unload="true" reload="true"/>
+    <effect				path="_dmc/effects/shell_556_smol" force="false" load="true" unload="true" reload="true"/>
     <effect				path="effects/payday2/particles/weapons/shells/shell_shak" force="true"/>
 	<!--Weapon Mod Trails and Muzzle Effects-->
 	<!--NATO Tracer-->
@@ -1370,8 +1378,17 @@
 	<texture			path="guis/dlcs/boost_in_lootdrop/textures/pd2/blackmarket/icons/mods/wpn_fps_upg_bonus_total_ammo_p3_sc"/>
 	<texture			path="guis/dlcs/boost_in_lootdrop/textures/pd2/blackmarket/icons/mods/wpn_fps_upg_bonus_team_exp_money_p3_sc"/>
 	
-	<!--Electric 40mm-->
+	<!--Ammo/Melee Status Icons-->
 	<texture			path="guis/textures/pd2/blackmarket/inv_mod_ammo_electric"/>
+	<texture			path="guis/textures/pd2/blackmarket/inv_mod_ammo_bleed"/>
+	<texture			path="guis/textures/pd2/blackmarket/melee_defense"/>
+	<texture			path="guis/textures/pd2/blackmarket/melee_parry"/>
+	<texture			path="guis/textures/pd2/blackmarket/melee_panic"/>
+	<texture			path="guis/textures/pd2/blackmarket/melee_headshot"/>
+	<texture			path="guis/textures/pd2/blackmarket/melee_backstab"/>
+	<texture			path="guis/textures/pd2/blackmarket/melee_chainsaw"/>
+	<texture			path="guis/textures/pd2/blackmarket/melee_charger"/>
+	<texture			path="guis/textures/pd2/blackmarket/melee_jackpot"/>
 
 	<!--Incendiary Grenade-->
 	<effect				path="effects/payday2/particles/explosions/grenade_incendiary_explosion_sc" load="false"/>
@@ -1502,8 +1519,7 @@
 	<unit				path="units/pd2_dlc_tawp/weapons/wpn_fps_pis_rsh12/wpn_fps_pis_rsh12" load="false"/>
 	<unit				path="units/pd2_dlc_osa/weapons/wpn_fps_sho_x_judge/wpn_fps_pis_x_judge" load="false"/>
 	<unit				path="units/pd2_dlc_osa/weapons/wpn_fps_pis_x_rage/wpn_fps_pis_x_rage" load="false"/>
-
-	<unit				path="units/mods/weapons/wpn_fps_pis_p38/wpn_fps_pis_p38" load="false"/>
+	<unit				path="units/pd2_dlc_khp/weapons/wpn_fps_pis_legacy/wpn_fps_pis_legacy" load="true" force="true"/>
 	
 	<object				path="units/pd2_dlc_gage_snp/weapons/wpn_fps_snp_msr_pts/wpn_fps_snp_msr_ns_suppressor" load="false"/>
 
@@ -1799,6 +1815,13 @@
 	<model				path="units/payday2/weapons/wpn_npc_child_grenade/wpn_npc_child_grenade"/>
 	<object				path="units/payday2/weapons/wpn_npc_child_grenade/wpn_npc_child_grenade"/>
 	<unit				path="units/payday2/weapons/wpn_npc_child_grenade/wpn_npc_child_grenade" load="true"/>
+	
+	<!-- Grenadier Grenades -->
+	<unit path="units/weapons/gas_grenade/gas_grenade_husk" load="true"/>
+	<unit path="units/weapons/gas_grenade/gas_grenade" load="true"/>
+	<!-- Trails for Tear Gas Grenades -->
+	<effect				path="effects/payday2/particles/weapons/tear_gas_trail_red"/>
+	<effect				path="effects/payday2/particles/weapons/tear_gas_trail_green"/>
 	
     <!--not shit secret masks-->
 	<object				path="units/pd2_dlc_sms/masks/sms_01/msk_sms_01" force="true"/>

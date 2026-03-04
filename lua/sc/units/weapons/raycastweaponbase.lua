@@ -53,22 +53,6 @@ function RaycastWeaponBase:setup(setup_data, damage_multiplier)
 
 	--self._bullet_slotmask = self._bullet_slotmask - World:make_slot_mask(16)
 
-	--Use stability stat to get the moving accuracy penalty.
-	if self._current_stats_indices and self._current_stats_indices.recoil then
-		self._spread_moving = tweak_data.weapon.stats.spread_moving[self._current_stats_indices.recoil] or 0
-	else --Fallback method for getting stability moving accuracy penalty, in case the indices somehow don't get set.
-		log("Using fallback")
-		local moving_spread_index = 0
-		local recoil_table = tweak_data.weapon.stats.recoil
-		for i = 0, 100, 1 do
-			if recoil_table[i] == self._recoil then
-				moving_spread_index = i
-				break
-			end
-		end
-		self._spread_moving = tweak_data.weapon.stats.spread_moving[moving_spread_index] or 0
-	end
-
 	--Trackers for MG Specialist Ace
 	for _, category in ipairs(self:weapon_tweak_data().categories) do
 		if managers.player:has_category_upgrade(category, "full_auto_free_ammo") then
@@ -170,7 +154,7 @@ function RaycastWeaponBase.collect_hits(from, to, setup_data, weapon_unit)
 	local ai_vision_ids = Idstring("ai_vision")
 	local bulletproof_ids = Idstring("bulletproof")
 	local weap_base = weapon_unit and weapon_unit.base and weapon_unit:base()
-	local is_semi_snp = can_shoot_through_shield and weap_base and weap_base.categories and not weap_base:is_category("amr") and weap_base:is_category("semi_snp", "dmr_l", "dmr_h") 
+	local is_semi_snp = can_shoot_through_shield and weap_base and weap_base.categories and not weap_base:is_category("amr", "big_iron") and weap_base:is_category("semi_snp", "dmr_l", "dmr_h", "shotgun_auto", "shotgun_light", "handcannon") 
 
 	--Just set this immediately.
 	local ray_hits = can_shoot_through_wall and World:raycast_wall("ray", from, to, "slot_mask", bullet_slotmask, "ignore_unit", ignore_unit, "thickness", 40, "thickness_mask", wall_mask)
@@ -187,8 +171,8 @@ function RaycastWeaponBase.collect_hits(from, to, setup_data, weapon_unit)
 		unit = hit.unit
 		u_key = unit:key()
 		local range = is_semi_snp and weap_base:get_damage_falloff(1, hit, managers.player:player_unit())
-			local near_falloff_distance = range and weap_base.near_falloff_distance
-			local distance = range and hit.distance
+		local near_falloff_distance = range and weap_base.near_falloff_distance
+		local distance = range and hit.distance
 		if not units_hit[u_key] then
 			units_hit[u_key] = true
 			unique_hits[#unique_hits + 1] = hit
@@ -204,12 +188,14 @@ function RaycastWeaponBase.collect_hits(from, to, setup_data, weapon_unit)
 				break
 			elseif hit.unit:in_slot(shield_mask) and alive(hit.unit:parent()) then
 				local parent_base = hit.unit:parent() and hit.unit:parent().base and hit.unit:parent():base()
-				if parent_base:has_tag("phalanx_vip") then
-					break
-				elseif parent_base:has_tag("shield_titan") and not can_shoot_through_titan_shield then
-					break
-				elseif parent_base:has_tag("shield") and (not can_shoot_through_shield or (is_semi_snp and distance > near_falloff_distance)) then
-					break
+				if parent_base then
+					if parent_base:has_tag("phalanx_vip") then
+						break
+					elseif parent_base:has_tag("shield_titan") and not can_shoot_through_titan_shield then
+						break
+					elseif parent_base:has_tag("shield") and (not can_shoot_through_shield or (is_semi_snp and distance > near_falloff_distance)) then
+						break
+					end
 				end
 			--[[
 				elseif hit.unit:in_slot(shield_mask) and (not can_shoot_through_shield or (is_semi_snp and distance > near_falloff_distance)) then
@@ -247,8 +233,10 @@ function RaycastWeaponBase:_get_current_damage(dmg_mul)
 end
 
 local ids_volley = Idstring("volley")
-function RaycastWeaponBase:get_object_damage_mult()
-	if self._fire_mode and self._fire_mode == ids_volley then
+function RaycastWeaponBase:get_object_damage_mult(is_explosion)
+	if is_explosion then
+		return self._object_damage_mult_exp
+	elseif self._fire_mode and self._fire_mode == ids_volley then
 		return self._object_damage_mult_volley
 	elseif self._rays and self._rays == 1 and self._object_damage_mult_single_ray then
 		return self._object_damage_mult_single_ray
@@ -525,10 +513,31 @@ function RaycastWeaponBase:_fire_raycast(user_unit, from_pos, direction, dmg_mul
 
 	local furthest_hit = ray_hits[#ray_hits]
 
-	if dmg_mul ~= 0 and (not furthest_hit or furthest_hit.distance > 200) and alive(self._obj_fire) then
+	if dmg_mul ~= 0 and (not furthest_hit or self._is_beam or furthest_hit.distance > 200) and alive(self._obj_fire) then
 		self._obj_fire:m_position(self._trail_effect_table.position)
-		mvec3_set(self._trail_effect_table.normal, mvec_spread_direction)
+		--mvec3_set(self._trail_effect_table.normal, mvec_spread_direction)
 
+		--Math to recalculate the normal vector of the tracer/trail to correctly start and end between the muzzle and the raycast hit position
+		--Overkill's "mvec3_set" above simply moves the whole normal vector in relation to the offset between the weapon muzzle's position in-world and the FPS camera
+			--this resulted in the end point of the trail being equally as offset to the point of impact as the muzzle is from the FPS camera
+		local impact_pos = Vector3()
+		if furthest_hit then
+			 mvec3_set(impact_pos, furthest_hit.position)
+		else --just spoof a point in the distance if there's nothing hit
+			 mvec3_set(impact_pos, mvec_spread_direction)
+			 mvec3_mul(impact_pos, ray_distance or 10000)
+			 mvec3_add(impact_pos, from_pos)
+		end
+
+		local new_normal = Vector3() --generate a new normal vector using the muzzle as the origin and the furthest hit as the end
+		mvec3_set(new_normal, impact_pos)
+		mvec3_sub(new_normal, self._trail_effect_table.position)
+
+		--There's still the limitation surrounding shots that go through things still appearing offset from any point of impact that isn't the last one
+			--since the offset of the muzzle makes it impossible to line up a trail through the new origin point, the area(s) shot through (which were calculated in relation to the camera) and the end point
+			--UNLESS... :^)
+		mvec3_set(self._trail_effect_table.normal, new_normal)
+		
 		if not self._trail_length then
 			self._trail_length = World:effect_manager():get_initial_simulator_var_vector2(Idstring("effects/particles/weapons/sniper_trail"), Idstring("trail"), Idstring("simulator_length"), Idstring("size"))
 		end
@@ -538,17 +547,17 @@ function RaycastWeaponBase:_fire_raycast(user_unit, from_pos, direction, dmg_mul
 		self._trail_effect_table_sniper.effect = Idstring("effects/particles/weapons/vapor_trail_sc")
 		local trail_sniper = self._use_vapor_trail and World:effect_manager():spawn(self._trail_effect_table_sniper)
 
-		if furthest_hit then
-			if self._use_sniper_trail then
-				mvector3.set_y(self._trail_length, furthest_hit and furthest_hit.distance)
-				World:effect_manager():set_simulator_var_vector2(trail, Idstring("trail"), Idstring("simulator_length"), Idstring("size"), self._trail_length)
-			else
-				World:effect_manager():set_remaining_lifetime(trail, math_clamp((furthest_hit.distance - 100) / 10000, 0, furthest_hit.distance))
-			end
-			if self._use_vapor_trail then
-				mvector3.set_y(self._trail_length, furthest_hit and furthest_hit.distance)
-				World:effect_manager():set_simulator_var_vector2(trail_sniper, Idstring("trail"), Idstring("simulator_length"), Idstring("size"), self._trail_length)
-			end
+		local trail_length_y = furthest_hit and furthest_hit.distance or ray_distance or 10000
+		
+		if self._use_sniper_trail then
+			mvector3.set_y(self._trail_length, trail_length_y)
+			World:effect_manager():set_simulator_var_vector2(trail, Idstring("trail"), Idstring("simulator_length"), Idstring("size"), self._trail_length)
+		else
+			World:effect_manager():set_remaining_lifetime(trail, math_clamp((trail_length_y - 100) / 10000, 0, trail_length_y))
+		end
+		if self._use_vapor_trail then
+			mvector3.set_y(self._trail_length, trail_length_y)
+			World:effect_manager():set_simulator_var_vector2(trail_sniper, Idstring("trail"), Idstring("simulator_length"), Idstring("size"), self._trail_length)
 		end
 	end
 
@@ -707,6 +716,9 @@ function RaycastWeaponBase:fire(from_pos, direction, dmg_mul, shoot_player, spre
 			if w_td.sounds and w_td.sounds.magazine_empty then
 				self:play_tweak_data_sound("magazine_empty")
 			end
+			if w_td.sounds and w_td.sounds.magazine_empty_alt then
+				managers.player:local_player():sound():say(w_td.sounds.magazine_empty_alt)
+			end
 
 			if w_td.effects and w_td.effects.magazine_empty then
 				self:_spawn_tweak_data_effect("magazine_empty")
@@ -854,6 +866,16 @@ function RaycastWeaponBase:run_and_shoot_allowed()
 		allowed = allowed or managers.player:has_category_upgrade(category, "hip_run_and_shoot")
 	end
 	
+	return allowed
+end
+
+function RaycastWeaponBase:run_and_shoot_no_sprintout()
+	local allowed = nil
+
+	for _, category in ipairs(self:categories()) do
+		allowed = allowed or managers.player:has_category_upgrade(category, "hip_run_and_shoot")
+	end
+
 	return allowed
 end
 
@@ -1214,19 +1236,36 @@ function InstantBulletBase:on_collision(col_ray, weapon_unit, user_unit, damage,
 		if hit_dmg_ext and hit_dmg_ext.damage_bullet then
 			local was_alive = not hit_dmg_ext:dead()
 			local armor_piercing, knock_down, stagger, variant, falloff_start = nil
+			local function check_stun(hit_unit)
+				local brain_ext = hit_unit:brain()
 
+				if brain_ext and brain_ext.is_hostage and brain_ext:is_hostage() then
+					return false
+				end
+
+				local base_ext = hit_unit:base()
+				local is_tank = base_ext and base_ext.has_tag and base_ext:has_tag("tank")
+
+				if base_ext and base_ext.char_tweak and base_ext:char_tweak().immune_to_concussion or is_tank then
+					return false
+				end
+
+				return true
+			end
+			local can_stun = check_stun(hit_unit) and col_ray.distance and (weap_base._natascha and col_ray.distance <= weap_base._natascha)
 			if weap_base then
 				can_push = (weap_base.near_falloff_distance and col_ray.distance and col_ray.distance <= weap_base.near_falloff_distance) 
 				armor_piercing = weap_base.has_armor_piercing and weap_base:has_armor_piercing()
-				knock_down = (col_ray.distance and (weap_base._natascha and col_ray.distance <= weap_base._natascha) or 
-									(weap_base._rays and weap_base._rays > 1 and col_ray.distance <= 300)) or 
+				knock_down = (weap_base._rays and weap_base._rays > 1 and col_ray.distance <= 300) or 
 								(weap_base.is_knock_down and weap_base:is_knock_down())
 				stagger = weap_base.is_stagger and weap_base:is_stagger()
 				variant = weap_base.variant and weap_base:variant()
 			end
 
 			result = self:give_impact_damage(col_ray, weapon_unit, user_unit, damage, armor_piercing, false, knock_down, stagger, variant)
-
+			if result and result.attack_data and result.attack_data.damage and result.attack_data.damage > 0 and can_stun then
+				result = ConcussiveInstantBulletBase:give_impact_damage(col_ray, weapon_unit, user_unit, 0, armor_piercing, false, false, false, "stun")
+			end
 			--[[
 			if (weap_base._natascha and col_ray.distance and col_ray.distance <= weap_base._natascha) and 
 				result and result.attack_data and result.attack_data.damage and result.attack_data.damage > 0 then
@@ -1331,6 +1370,7 @@ function DOTBulletBase:start_dot_damage(col_ray, weapon_unit, dot_data, weapon_i
 end
 --]]
 
+FlameBulletBase.stop_on_impact = false
 FlameBulletBase.VARIANT = "fire_bullet"
 
 --Fire no longer memes on shields.
@@ -1443,16 +1483,36 @@ function FlameBulletBase:on_collision(col_ray, weapon_unit, user_unit, damage, b
 			local was_alive = not hit_dmg_ext:dead()
 			local armor_piercing, knock_down, stagger, variant = nil
 
+			local function check_stun(hit_unit)
+				local brain_ext = hit_unit:brain()
+
+				if brain_ext and brain_ext.is_hostage and brain_ext:is_hostage() then
+					return false
+				end
+
+				local base_ext = hit_unit:base()
+				local is_tank = base_ext and base_ext.has_tag and base_ext:has_tag("tank")
+
+				if base_ext and base_ext.char_tweak and base_ext:char_tweak().immune_to_concussion or is_tank then
+					return false
+				end
+
+				return true
+			end
+			local can_stun = check_stun(hit_unit) and col_ray.distance and (weap_base._natascha and col_ray.distance <= weap_base._natascha)
 			if weap_base then
+				can_push = (weap_base.near_falloff_distance and col_ray.distance and col_ray.distance <= weap_base.near_falloff_distance) 
 				armor_piercing = weap_base.has_armor_piercing and weap_base:has_armor_piercing()
-				knock_down = (col_ray.distance and (weap_base._natascha and col_ray.distance <= weap_base._natascha) or 
-									(weap_base._rays and weap_base._rays > 1 and col_ray.distance <= 300)) or 
+				knock_down = (weap_base._rays and weap_base._rays > 1 and col_ray.distance <= 300) or 
 								(weap_base.is_knock_down and weap_base:is_knock_down())
 				stagger = weap_base.is_stagger and weap_base:is_stagger()
 				variant = weap_base.variant and weap_base:variant()
 			end
 
 			result = self:give_fire_damage(col_ray, weapon_unit, user_unit, damage, armor_piercing, false, knock_down, stagger, variant)
+			if result and result.attack_data and result.attack_data.damage and result.attack_data.damage > 0 and can_stun then
+				result = ConcussiveInstantBulletBase:give_impact_damage(col_ray, weapon_unit, user_unit, 0, armor_piercing, false, false, false, "stun")
+			end
 
 			if result ~= "friendly_fire" then
 				local ammo_data = weap_base and weap_base.ammo_data and weap_base:ammo_data()
@@ -1484,13 +1544,19 @@ function FlameBulletBase:on_collision(col_ray, weapon_unit, user_unit, damage, b
 	end
 
 	if do_shotgun_push then
-		managers.game_play_central:do_shotgun_push(col_ray.unit, col_ray.position, col_ray.ray, col_ray.distance, user_unit)
+		-- managers.game_play_central:do_shotgun_push(col_ray.unit, col_ray.position, col_ray.ray, col_ray.distance, user_unit)
 	end
 
 	--Play Impact flesh is never true on fire bullets. No need for this conditional.
 
 	--DB Always plays impact sound and effects.
-	self:play_impact_sound_and_effects(weapon_unit, col_ray, no_sound)
+	if play_impact_flesh then
+		managers.game_play_central:play_impact_flesh({
+			col_ray = col_ray,
+			no_sound = no_sound
+		})
+		self:play_impact_sound_and_effects(weapon_unit, col_ray, no_sound)
+	end
 
 	return result
 end
@@ -1537,15 +1603,24 @@ function FlameBulletBase:start_dot_damage(col_ray, weapon_unit, dot_data, weapon
 			attacker = alive(attacker) and attacker or nil
 			weapon = user_unit
 		end
-	end
-
-	if dot_data.dot_trigger_max_distance then
-		if not attacker then
-			return
-		end
 
 		distance = mvector3.distance(attacker:position(), target_unit:position())
-		can_dot = distance <= dot_data.dot_trigger_max_distance
+	end
+
+	if distance then
+		if dot_data.dot_trigger_max_falloff then
+			if weap_base and weap_base.near_falloff_distance then
+				can_dot = distance <= weap_base.near_falloff_distance
+			end
+		end
+
+		if dot_data.dot_trigger_max_distance then
+			if not attacker then
+				return
+			end
+
+			can_dot = distance <= dot_data.dot_trigger_max_distance
+		end
 	end
 
 	if not can_dot then
@@ -1618,6 +1693,14 @@ function FlameBulletBase:start_dot_damage(col_ray, weapon_unit, dot_data, weapon
 	end
 end
 
+function FlameBulletBase:play_impact_sound_and_effects(weapon_unit, col_ray, no_sound)
+	if weapon_unit then
+		local weap_base = weapon_unit:base()
+		if weap_base and not table.contains(weap_base:categories(), "flamethrower") then
+			managers.game_play_central:play_impact_sound_and_effects(self:_get_sound_and_effects_params(weapon_unit, col_ray, no_sound))
+		end
+	end
+end
 
 BleedBulletBase = BleedBulletBase or class(DOTBulletBase)
 BleedBulletBase.VARIANT = "bleed"
@@ -1701,7 +1784,7 @@ function BleedBulletBase:give_damage_dot(col_ray, weapon_unit, attacker_unit, da
 	return defense_data
 end
 
-function InstantExplosiveBulletBase:on_collision(col_ray, weapon_unit, user_unit, damage, blank, no_sound)
+function InstantExplosiveBulletBase:on_collision(col_ray, weapon_unit, user_unit, damage, blank, no_sound, di_mult)
 	local hit_unit = col_ray.unit
 	user_unit = alive(user_unit) and user_unit or nil
 	weapon_unit = alive(weapon_unit) and weapon_unit or nil
@@ -1729,9 +1812,11 @@ function InstantExplosiveBulletBase:on_collision(col_ray, weapon_unit, user_unit
 		local overkill = managers.player:temporary_upgrade_value("temporary", "overkill_damage_multiplier", 1)
 		local weap_base = weapon_unit:base()
 		local tweak_data = weap_base and ((weap_base.weapon_tweak_data and weap_base:weapon_tweak_data()) or (weap_base._tweak_projectile_entry and tweak_data.projectiles[weap_base._tweak_projectile_entry]))
-		local di_percent = (tweak_data and tweak_data.direct_damage_percent) or 0.5
+		local falloff = weap_base:get_damage_falloff(1, col_ray, user_unit, nil, true) or 1
+		local di_percent = (((tweak_data and tweak_data.direct_damage_percent) or 0.5) * (di_mult or 1)) * falloff
+		local object_damage_mult = weap_base and weap_base.get_object_damage_mult and weap_base:get_object_damage_mult(true)
 		self.super:on_collision(col_ray, weapon_unit, user_unit, (damage * di_percent) * overkill, blank, no_sound)
-		self:on_collision_server(tmp_vec1, col_ray.normal, damage * 1, user_unit, weapon_unit, managers.network:session():local_peer():id())
+		self:on_collision_server(tmp_vec1, col_ray.normal, damage * 1, user_unit, weapon_unit, managers.network:session():local_peer():id(), nil, object_damage_mult)
 
 		return {
 			variant = "explosion",
@@ -1815,6 +1900,7 @@ function InstantExplosiveBulletBase:on_collision_client(position, normal, damage
 end
 
 function ConcussiveInstantBulletBase:give_impact_damage(col_ray, weapon_unit, user_unit, damage, ...)
+	--[[
 	if col_ray.unit:character_damage().on_concussion then
 		local conc_tweak = alive(weapon_unit) and weapon_unit:base().concussion_tweak and weapon_unit:base():concussion_tweak()
 		local conc_mul = conc_tweak and conc_tweak.mul or tweak_data.character.concussion_multiplier
@@ -1830,7 +1916,7 @@ function ConcussiveInstantBulletBase:give_impact_damage(col_ray, weapon_unit, us
 			managers.environment_controller:set_concussion_grenade(col_ray.unit:movement():m_head_pos(), true, 0, 0, conc_mul, true, true)
 			col_ray.unit:character_damage():on_concussion(sound_eff_mul, false, sound_tweak)
 		end
-	elseif Network:is_server() and col_ray.unit:character_damage().stun_hit then
+	else--]] if Network:is_server() and col_ray.unit:character_damage().stun_hit then
 		local function can_stun(hit_unit)
 			local brain_ext = hit_unit:brain()
 
@@ -1849,7 +1935,7 @@ function ConcussiveInstantBulletBase:give_impact_damage(col_ray, weapon_unit, us
 
 		if can_stun(col_ray.unit) then
 			local action_data = {
-				variant = "stun",
+				variant = "bullet",
 				damage = 0,
 				attacker_unit = user_unit,
 				weapon_unit = weapon_unit,

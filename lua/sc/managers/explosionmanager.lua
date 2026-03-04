@@ -150,17 +150,18 @@ function ExplosionManager:_damage_characters(detect_results, params, variant, da
 	return results
 end
 
-function ExplosionManager:give_local_player_dmg(pos, range, damage, user_unit)
+function ExplosionManager:give_local_player_dmg(pos, range, damage, user_unit, curve_pow, ignore_los)
 	local player = managers.player:player_unit()
-	local los = managers.environment_controller:test_line_of_sight(pos + Vector3(0, 0, 150), 200, range / 3, range) or 0
+	local los = (ignore_los and true) or managers.environment_controller:test_line_of_sight_explosion(pos, range) or false
 
-	if player and los > 0 then
+	if player and los then
 		player:character_damage():damage_explosion({
 			attacker_unit = user_unit,
 			variant = "explosion",
 			position = pos,
 			range = range,
-			damage = damage
+			damage = damage,
+			curve_pow = curve_pow
 		})
 	end
 end

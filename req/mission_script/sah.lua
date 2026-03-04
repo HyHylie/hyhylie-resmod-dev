@@ -1,8 +1,6 @@
-local difficulty = tweak_data:difficulty_to_index(Global.game_settings and Global.game_settings.difficulty or "normal")
-local pro_job = Global.game_settings and Global.game_settings.one_down
-local hunt_projob = pro_job
-local ponr_value = (difficulty <= 5 and 600 or (difficulty == 6 or difficulty == 7) and 570) or 540
 
+local hunt_projob = pro_job
+local murky_response_timer = (mayhem_above and 90) or 120
 local disabled = {
 	values = {
         enabled = false
@@ -25,15 +23,25 @@ local high_interval = {
 }	
 
 return {
-	--Pro Job PONR 
+	-- Pro Job PONR
+	-- Murkies spawn after a while
 	[103820] = {
-		ponr = ponr_value
+		on_executed = {
+			{id = 400024, delay = 0, },
+			{id = 400001, delay = murky_response_timer},
+		},
 	},
-	--Trigger Hunt on Pro Jobs (Endless Assault)
+	-- Turn off Whisper State
+	[100680] = {
+			on_executed = {
+			{id = 400024, delay = 0, },
+		},
+	},
+	-- Trigger Hunt on Pro Jobs (Endless Assault)
 	[101175] = {
 		values = {
-			enabled = hunt_projob
-		}
+			enabled = hunt_projob,
+		},
 	},
 	-- Disable instant difficulty increase
 	[100122] = disabled,

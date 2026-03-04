@@ -31,6 +31,30 @@ return {
 			{ id = 400005, delay = 0, },
 		},
 	},
+	-- FWB  vault styled ambush (you know, when the vault door opens and a swarm of enemies are waiting for you. yeah that one)
+	-- Enabale them when the heist goes loud 
+	[101756] = {
+		on_executed = {
+			{id = 400032, delay = 0,},
+		},
+	},
+	-- Spawn units  when the vault door opens 
+	[100851] = {
+		on_executed = {
+			{ id = 400008, delay = 0, },
+			{ id = 400009, delay = 0, },
+			{ id = 400012, delay = 0, },
+			{ id = 400013, delay = 0, },
+			{ id = 400014, delay = 0, },
+			{ id = 400015, delay = 0, },
+			{ id = 400020, delay = 0, },
+			{ id = 400022, delay = 0, },
+			{ id = 400023, delay = 0, },
+			{ id = 400026, delay = 0, },
+			{ id = 400028, delay = 0, },
+			{ id = 400030, delay = 0, },
+		},
+	},
 	-- Remove vanilla reinforce
 	[103204] = disable,
 	[103205] = disable,

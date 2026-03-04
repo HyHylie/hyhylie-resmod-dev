@@ -500,6 +500,18 @@ function TipsTweakData:init()
 			category = "stealth_res"
 		},
 		{
+			cat_index = 22,
+			image = "enemy_guards",
+			consoles = true,
+			category = "stealth_res"
+		},
+		{
+			cat_index = 23,
+			image = "enemy_guards",
+			consoles = true,
+			category = "stealth_res"
+		},
+		{
 			cat_index = 1,
 			image = "general_enforcer",
 			consoles = true,
@@ -742,6 +754,24 @@ function TipsTweakData:init()
 		{
 			cat_index = 41,
 			image = "tactics_shooting",
+			consoles = true,
+			category = "equip_skills_res"
+		},
+		{
+			cat_index = 42,
+			image = "heister_rust",
+			consoles = true,
+			category = "equip_skills_res"
+		},
+		{
+			cat_index = 43,
+			image = "heister_rust",
+			consoles = true,
+			category = "equip_skills_res"
+		},
+		{
+			cat_index = 44,
+			image = "heister_rust",
 			consoles = true,
 			category = "equip_skills_res"
 		},

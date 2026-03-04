@@ -488,7 +488,7 @@ function SkillTreeTweakData:init(tweak_data)
 					},
 					[2] = {
 						upgrades = {
-							"shotgun_extra_rays",
+							--"shotgun_extra_rays",
 							"shotgun_damage_min_bonus"
 						},
 						cost = self.costs.pro
@@ -540,15 +540,15 @@ function SkillTreeTweakData:init(tweak_data)
 					["icon_xy"] = {8, 5},
 					[1] = {
 						upgrades = {
-							"shotgun_can_shoot_through_enemy",
-							"shotgun_ap_bullets_1"
+							"shotgun_steelsight_accuracy_inc_1",
+							"shotgun_steelsight_range_inc_1"
 						},
 						cost = self.costs.hightier
 					},
 					[2] = {
 						upgrades = {
-							"shotgun_steelsight_accuracy_inc_1",
-							"shotgun_steelsight_range_inc_1"
+							"shotgun_can_shoot_through_enemy",
+							"shotgun_ap_bullets_1"
 						},
 						cost = self.costs.hightierpro
 					}
@@ -605,14 +605,14 @@ function SkillTreeTweakData:init(tweak_data)
 					["icon_xy"] = {6, 1},
 					[1] = {
 						upgrades = {
-							"player_resist_melee_push"
+							"player_resist_melee_push",
+							"player_resist_knockback_push"
 						},
 						cost = self.costs.default
 					},
 					[2] = {
 						upgrades = {
-							"player_flashbang_multiplier_2",
-							"player_resist_knockback_push"
+							"player_flashbang_multiplier_2"
 						},
 						cost = self.costs.pro
 					}
@@ -650,7 +650,8 @@ function SkillTreeTweakData:init(tweak_data)
 					},
 					[2] = {
 						upgrades = {
-							"carry_movement_penalty_nullifier"
+							"carry_movement_penalty_nullifier",
+							"carry_increased_carry_weight"
 						},
 						cost = self.costs.pro
 					}
@@ -727,7 +728,8 @@ function SkillTreeTweakData:init(tweak_data)
 						["icon_xy"] = {8, 11},
 						[1] = {
 							upgrades = {
-								"player_increased_pickup_area_1"
+								"player_increased_pickup_area_1",
+								"player_scaling_pickup_area"
 							},
 							cost = self.costs.hightier
 						},
@@ -829,7 +831,8 @@ function SkillTreeTweakData:init(tweak_data)
 						["icon_xy"] = {3, 0},
 						[1] = {
 							upgrades = {
-								"player_fully_loaded_pick_up_multiplier"
+								"player_fully_loaded_pick_up_multiplier",
+								"player_throwables_multiplier"
 							},
 							cost = self.costs.hightier
 						},
@@ -913,13 +916,14 @@ function SkillTreeTweakData:init(tweak_data)
 					["icon_xy"] = {9, 4},
 					[1] = {
 						upgrades = {
-							"player_throwables_multiplier"
+							"grenade_crate_ammo_increase1"
 						},
 						cost = self.costs.hightier
 					},
 					[2] = {
 						upgrades = {
-							"second_deployable_1"
+							"second_deployable_1",
+							"grenade_crate_quantity"
 						},
 						cost = self.costs.hightierpro
 					}
@@ -959,7 +963,8 @@ function SkillTreeTweakData:init(tweak_data)
 					[2] = {
 						upgrades = {
 							"player_armor_regen_timer_multiplier_tier",
-							"player_armor_full_damage_absorb"
+							"player_armor_full_damage_absorb",
+							"player_scaling_armor_break_grace"
 						},
 						cost = self.costs.hightierpro
 					}
@@ -976,13 +981,14 @@ function SkillTreeTweakData:init(tweak_data)
 					[1] = {
 						upgrades = {
 							"player_drill_alert",
-							"player_silent_drill"
+							"player_silent_drill",
+							"player_drill_fix_interaction_speed_multiplier_1"
 						},
 						cost = self.costs.default
 					},
 					[2] = {
 						upgrades = {
-							"player_drill_fix_interaction_speed_multiplier_1"
+							"player_drill_fix_interaction_speed_multiplier_2"
 						},
 						cost = self.costs.pro
 					}
@@ -1035,13 +1041,13 @@ function SkillTreeTweakData:init(tweak_data)
 					["icon_xy"] = {9, 9},
 					[1] = {
 						upgrades = {
-							"trip_mine_fire_trap_1"
+							"trip_mine_fire_trap_1",
+							"trip_mine_quantity_increase_1",
 						},
 						cost = self.costs.hightier
 					},
 					[2] = {
 						upgrades = {
-							"trip_mine_quantity_increase_1",
 							"trip_mine_quantity_increase_2",
 							"trip_mine_damage_multiplier_1"
 						},
@@ -1126,10 +1132,10 @@ function SkillTreeTweakData:init(tweak_data)
 					},
 					[2] = {
 						upgrades = {
-							"assault_rifle_ap_bullets_min_1",
-							"snp_ap_bullets_min_1",
 							"assault_rifle_reload_speed_multiplier_2",
-							"snp_reload_speed_multiplier_2"
+							"snp_reload_speed_multiplier_2",
+							"assault_rifle_enter_steelsight_speed_multiplier",
+							"snp_enter_steelsight_speed_multiplier"
 						},
 						cost = self.costs.pro
 					}
@@ -1142,10 +1148,8 @@ function SkillTreeTweakData:init(tweak_data)
 					["icon_xy"] = {6, 5},
 					[1] = {
 						upgrades = {
-							"assault_rifle_steelsight_accuracy_inc_1",
-							"snp_steelsight_accuracy_inc_1",
-							"assault_rifle_steelsight_range_inc_1",
-							"snp_steelsight_range_inc_1",
+							"assault_rifle_stationary_steelsight_accuracy_inc_1",
+							"snp_stationary_steelsight_accuracy_inc_1",
 							"assault_rifle_recoil_index_addend_2",
 							"snp_recoil_index_addend_2"
 						},
@@ -1153,12 +1157,14 @@ function SkillTreeTweakData:init(tweak_data)
 					},
 					[2] = {
 						upgrades = {
-							"assault_rifle_steelsight_accuracy_inc_2",
-							"snp_steelsight_accuracy_inc_2",
-							"assault_rifle_steelsight_range_inc_2",
-							"snp_steelsight_range_inc_2",
-							"assault_rifle_enter_steelsight_speed_multiplier",
-							"snp_enter_steelsight_speed_multiplier"
+							"assault_rifle_stationary_steelsight_accuracy_inc_2",
+							"snp_stationary_steelsight_accuracy_inc_2",
+								"assault_rifle_steelsight_accuracy_inc_1",
+								"snp_steelsight_accuracy_inc_1",
+							"assault_rifle_steelsight_range_inc_1",
+							"snp_steelsight_range_inc_1",
+							"assault_rifle_ap_bullets_min_1",
+							"snp_ap_bullets_min_1"
 						},
 						cost = self.costs.hightierpro
 					}
@@ -1534,7 +1540,6 @@ function SkillTreeTweakData:init(tweak_data)
 					},
 					[2] = {
 						upgrades = {
-							"weapon_enter_steelsight_speed_multiplier_2",
 							"player_special_double_drop"
 						},
 						cost = self.costs.hightierpro
@@ -1664,7 +1669,8 @@ function SkillTreeTweakData:init(tweak_data)
 					},
 					[2] = {
 						upgrades = {
-							"pistol_reload_speed_multiplier_2"
+							"pistol_reload_speed_multiplier_2",
+							"pistol_move_spread_multiplier_2"
 						},
 						cost = self.costs.hightierpro
 					}
@@ -1698,12 +1704,14 @@ function SkillTreeTweakData:init(tweak_data)
 					["icon_xy"] = {11, 1},
 					[1] = {
 						upgrades = {
+							"pistol_steelsight_accuracy_inc_1",
 							"pistol_stacked_accuracy_bonus_1"
 						},
 						cost = self.costs.hightier
 					},
 					[2] = {
 						upgrades = {
+							"pistol_steelsight_range_inc_1",
 							"pistol_stacked_accuracy_bonus_2"
 						},
 						cost = self.costs.hightierpro
@@ -2122,7 +2130,7 @@ function SkillTreeTweakData:init(tweak_data)
 					"player_passive_dodge_chance_1"
 				},
 				cost = 400,
-				icon_xy = {1, 1},
+				icon_xy = {4, 0},
 				name_id = "menu_deck2_3",
 				desc_id = "menu_deck2_3_desc_sc"
 			},
@@ -2592,6 +2600,7 @@ function SkillTreeTweakData:init(tweak_data)
 				"buildup_meter_hysteria_1",
 				"buildup_meter_elude_1",
 				"buildup_meter_terrify_1",
+				"player_melee_kill_stamina_1",
 			},
 			texture_bundle_folder = "sc",
 			icon_xy = {0, 0}
@@ -2607,8 +2616,10 @@ function SkillTreeTweakData:init(tweak_data)
 				"buildup_meter_hysteria_1",
 				"buildup_meter_elude_1",
 				"buildup_meter_terrify_1",
+				"player_melee_kill_stamina_1",
 				
 				"player_melee_fists_damage_multiplier",
+				"player_melee_fists_damage_effect_multiplier",
 				"buildup_meter_tony_extra_ammo_multiplier_1",
 				"buildup_meter_tony_pick_up_multiplier_1",
 				"player_buildup_meter_rick",
@@ -2636,6 +2647,7 @@ function SkillTreeTweakData:init(tweak_data)
 				"buildup_meter_hysteria_1",
 				"buildup_meter_elude_1",
 				"buildup_meter_terrify_1",
+				"player_melee_kill_stamina_1",
 				
 				"player_buildup_meter_aubrey"
 			},
@@ -2653,10 +2665,11 @@ function SkillTreeTweakData:init(tweak_data)
 				"buildup_meter_hysteria_1",
 				"buildup_meter_elude_1",
 				"buildup_meter_terrify_1",
+				"player_melee_kill_stamina_1",
 				
 				"buildup_meter_pacify_2",
 				"buildup_meter_hurt_decay_mod_1",
-				"buildup_meter_hurt_decay_mod_2"
+				"buildup_meter_hurt_decay_mod_2",
 			},
 			texture_bundle_folder = "sc",
 			icon_xy = {0, 3}
@@ -2672,6 +2685,7 @@ function SkillTreeTweakData:init(tweak_data)
 				"buildup_meter_hysteria_1",
 				"buildup_meter_elude_1",
 				"buildup_meter_terrify_1",
+				"player_melee_kill_stamina_1",
 				
 				"player_buildup_meter_zack_1"
 			},
@@ -2689,6 +2703,7 @@ function SkillTreeTweakData:init(tweak_data)
 				"buildup_meter_hysteria_1",
 				"buildup_meter_elude_1",
 				"buildup_meter_terrify_1",
+				"player_melee_kill_stamina_1",
 
 				"player_buildup_meter_rick"
 			},
@@ -2706,6 +2721,7 @@ function SkillTreeTweakData:init(tweak_data)
 				"buildup_meter_hysteria_1",
 				"buildup_meter_elude_1",
 				"buildup_meter_terrify_1",
+				"player_melee_kill_stamina_1",
 
 				"buildup_meter_redline_2",
 				"player_buildup_meter_zack_1",
@@ -2725,6 +2741,7 @@ function SkillTreeTweakData:init(tweak_data)
 				"buildup_meter_hysteria_1",
 				"buildup_meter_elude_1",
 				"buildup_meter_terrify_1",
+				"player_melee_kill_stamina_1",
 				
 				"player_buildup_meter_earl",
 				"buildup_meter_hysteria_2",
@@ -2743,8 +2760,10 @@ function SkillTreeTweakData:init(tweak_data)
 				"buildup_meter_hysteria_1",
 				"buildup_meter_elude_1",
 				"buildup_meter_terrify_1",
+				"player_melee_kill_stamina_1",
 				
 				"player_melee_brass_damage_multiplier",
+				"player_melee_brass_damage_effect_multiplier",
 				"buildup_meter_tony_extra_ammo_multiplier_1",
 				"buildup_meter_tony_extra_ammo_multiplier_2",
 				"buildup_meter_tony_pick_up_multiplier_1",
@@ -2779,8 +2798,13 @@ function SkillTreeTweakData:init(tweak_data)
 				"buildup_meter_hysteria_1",
 				"buildup_meter_elude_1",
 				"buildup_meter_terrify_1",
+				"player_melee_kill_stamina_1",
 				
-				"player_buildup_meter_mark"
+				"player_buildup_meter_mark",
+				"player_melee_kill_stamina_2",
+				"player_melee_kill_stamina_3",
+				"buildup_meter_redline_2",
+				"buildup_meter_redline_3"
 			},
 			texture_bundle_folder = "sc",
 			icon_xy = {1, 1}
@@ -2796,6 +2820,7 @@ function SkillTreeTweakData:init(tweak_data)
 				"buildup_meter_hysteria_1",
 				"buildup_meter_elude_1",
 				"buildup_meter_terrify_1",
+				"player_melee_kill_stamina_1",
 				
 				"player_buildup_meter_swan",
 				"buildup_meter_elude_2",
@@ -2817,6 +2842,7 @@ function SkillTreeTweakData:init(tweak_data)
 				"buildup_meter_hysteria_1",
 				"buildup_meter_elude_1",
 				"buildup_meter_terrify_1",
+				"player_melee_kill_stamina_1",
 				
 				"buildup_meter_elude_2",
 				"buildup_meter_hurt_decay_mod_1",
@@ -2983,6 +3009,7 @@ function SkillTreeTweakData:init(tweak_data)
 				upgrades = {
 					"player_damage_to_hot_1",
 					"player_level_5_armor_addend_grinder",
+					"player_level_5_deflection_addend_grinder",
 					"player_flak_jacket_concealment_1"
 				},
 				cost = 200,
@@ -3077,7 +3104,7 @@ function SkillTreeTweakData:init(tweak_data)
 			{
 				upgrades = {
 					"player_melee_kill_dodge_regen",
-					"player_melee_double_interval",
+					--"player_melee_double_interval",
 					"player_passive_dodge_chance_2"
 				},
 				cost = 2400,
@@ -3291,79 +3318,266 @@ function SkillTreeTweakData:init(tweak_data)
 		}
 		
 	--Rust Perlman--
+	local biker_1_multi_choice = {
+		{
+			name_id = "menu_deck16_1_1_sc",
+			desc_id = "menu_deck16_1_1_desc_sc",
+			short_id = "menu_deck16_1_1_desc_sc",
+			icon_atlas = "icons_atlas",
+			upgrades = {
+				"team_biker_crew_heal_potency"
+			},
+			texture_bundle_folder = "wild",
+			icon_xy = {
+				1,
+				3
+			}
+		},
+		{
+			name_id = "menu_deck16_1_2_sc",
+			desc_id = "menu_deck16_1_2_desc_sc",
+			short_id = "menu_deck16_1_2_desc_sc",
+			icon_atlas = "icons_atlas",
+			upgrades = {
+				"team_biker_ammo_pickup_multiplier"
+			},
+			texture_bundle_folder = "wild",
+			icon_xy = {
+				0,
+				2
+			}
+		}
+	}
+	local biker_3_multi_choice = {
+		{
+			name_id = "menu_deck16_3_1_sc",
+			desc_id = "menu_deck16_3_1_desc_sc",
+			short_id = "menu_deck16_3_1_desc_sc",
+			icon_atlas = "icons_atlas",
+			upgrades = {
+				"player_biker_stack_change_adjustments_1"
+			},
+			icon_xy = {
+				2,
+				7
+			}
+		},
+		{
+			name_id = "menu_deck16_3_2_sc",
+			desc_id = "menu_deck16_3_2_desc_sc",
+			short_id = "menu_deck16_3_2_desc_sc",
+			icon_atlas = "icons_atlas",
+			upgrades = {
+				"player_biker_stack_change_adjustments_2"
+			},
+			icon_xy = {
+				4,
+				2
+			}
+		},
+		{
+			name_id = "menu_deck16_3_3_sc",
+			desc_id = "menu_deck16_3_3_desc_sc",
+			short_id = "menu_deck16_3_3_desc_sc",
+			icon_atlas = "icons_atlas",
+			upgrades = {
+				"player_biker_stack_change_adjustments_3"
+			},
+			icon_xy = {
+				7,
+				3
+			}
+		}
+	}
+	local biker_5_multi_choice = {
+		{
+			name_id = "menu_deck16_5_1_sc",
+			desc_id = "menu_deck16_5_1_desc_sc",
+			short_id = "menu_deck16_5_1_desc_sc",
+			icon_atlas = "icons_atlas",
+			upgrades = {
+				"team_biker_crew_movespeed_bonus"
+			},
+			texture_bundle_folder = "wild",
+			icon_xy = {
+				1,
+				2
+			}
+		},
+		{
+			name_id = "menu_deck16_5_2_sc",
+			desc_id = "menu_deck16_5_2_desc_sc",
+			short_id = "menu_deck16_5_2_desc_sc",
+			icon_atlas = "icons_atlas",
+			upgrades = {
+				"team_biker_crew_reload_bonus"
+			},
+			texture_bundle_folder = "wild",
+			icon_xy = {
+				3,
+				2
+			}
+		}
+	}
+	local biker_7_multi_choice = {
+		{
+			name_id = "menu_deck16_7_1_sc",
+			desc_id = "menu_deck16_7_1_desc_sc",
+			short_id = "menu_deck16_7_1_desc_sc",
+			icon_atlas = "icons_atlas",
+			upgrades = {
+				"player_biker_stacks_on_revive"
+			},
+			texture_bundle_folder = "wild",
+			icon_xy = {
+				0,
+				3
+			}
+		},
+		{
+			name_id = "menu_deck16_7_2_sc",
+			desc_id = "menu_deck16_7_2_desc_sc",
+			short_id = "menu_deck16_7_2_short_sc",
+			icon_atlas = "icons_atlas",
+			upgrades = {
+				"player_biker_personal_kill_stack_reward"
+			},
+			icon_xy = {
+				3,
+				7
+			}
+		}
+	}
+	local biker_9_multi_choice = {
+		{
+			name_id = "menu_deck16_9_1_sc",
+			desc_id = "menu_deck16_9_1_desc_sc",
+			short_id = "menu_deck16_9_1_desc_sc",
+			icon_atlas = "icons_atlas",
+			upgrades = {
+				"team_biker_damage_to_lose_2",
+				"team_biker_regen_health",
+				"player_biker_causer_of_regen"
+			},
+			texture_bundle_folder = "wild",
+			icon_xy = {
+				2,
+				2
+			}
+		},
+		{
+			name_id = "menu_deck16_9_2_sc",
+			desc_id = "menu_deck16_9_2_desc_sc",
+			short_id = "menu_deck16_9_2_short_sc",
+			icon_atlas = "icons_atlas",
+			upgrades = {
+				"team_biker_armour_regen_bonus",
+				"team_biker_additional_armour"
+			},
+			texture_bundle_folder = "wild",
+			icon_xy = {
+				2,
+				3
+			}
+		},
+		{
+			name_id = "menu_deck16_9_3_sc",
+			desc_id = "menu_deck16_9_3_desc_sc",
+			short_id = "menu_deck16_9_3_desc_sc",
+			icon_atlas = "icons_atlas",
+			upgrades = {
+				"team_biker_stamina_regen_bonus",
+				"team_biker_additional_move_reload_bonus"
+			},
+			icon_xy = {
+				2,
+				0
+			}
+		},
+		{
+			name_id = "menu_deck16_9_4_sc",
+			desc_id = "menu_deck16_9_4_desc_sc",
+			short_id = "menu_deck16_9_4_short_sc",
+			icon_atlas = "icons_atlas",
+			upgrades = {
+				"team_biker_crew_kill_stack_reward"
+			},
+			icon_xy = {
+				3,
+				7
+			}
+		}
+	}
+
 	local sc_fat_dick = {
 			{
 				cost = 200,
-				texture_bundle_folder = "wild",
 				desc_id = "menu_deck16_1_desc_sc",
+				short_id = "menu_deck16_1_short_sc",
 				name_id = "menu_deck16_1",
 				upgrades = {
-					"player_wild_health_amount_1"
+					"player_biker_aura",
+					"team_biker_damage_to_lose_1"
 				},
-				icon_xy = {
-					0,
-					0
-				}
+				texture_bundle_folder = "wild",
+				icon_xy = {0, 0},
+				multi_choice = biker_1_multi_choice
 			},
 			deck2,
 			{
 				cost = 400,
-				texture_bundle_folder = "wild",
 				desc_id = "menu_deck16_3_desc_sc",
 				name_id = "menu_deck16_3",
 				upgrades = {
-					"player_biker_armor_regen_1"
+					"player_biker_treat_as_more_cohesion",
+					"player_passive_dodge_chance_1"
 				},
-				icon_xy = {0, 0},
-				texture_bundle_folder = "opera"
+				texture_bundle_folder = "wild",
+				icon_xy = {1, 0},
+				multi_choice = biker_3_multi_choice
 			},
 			deck4,
 			{
 				cost = 1000,
-				texture_bundle_folder = "wild",
 				desc_id = "menu_deck16_5_desc_sc",
 				name_id = "menu_deck16_5",
 				upgrades = {
-					"player_less_armor_wild_cooldown_1",
 					"player_corpse_dispose_speed_multiplier",
-					"player_civ_move_multiplier"	
+					"player_civ_move_multiplier"
 				},
-				icon_xy = {
-					0,
-					1
-				}
+				icon_xy = {3, 0},
+				multi_choice = biker_5_multi_choice
 			},
 			deck6,
 			{
 				cost = 2400,
-				texture_bundle_folder = "wild",
 				desc_id = "menu_deck16_7_desc_sc",
 				name_id = "menu_deck16_7",
 				upgrades = {
-					"player_biker_armor_regen_2"
+					"player_passive_dodge_chance_2"
 				},
-				icon_xy = {0, 0},
-				texture_bundle_folder = "opera"
+				icon_xy = {2, 2},
+				multi_choice = biker_7_multi_choice
 			},
 			deck8,
 			{
 				cost = 4000,
-				texture_bundle_folder = "wild",
 				desc_id = "menu_deck16_9_desc_sc",
 				name_id = "menu_deck16_9",
 				upgrades = {
 					"player_passive_loot_drop_multiplier_1",
-					"player_less_armor_wild_health_1"
+					"team_biker_increase_default_tendency"
 				},
-				icon_xy = {
-					3,
-					0
-				}
+				icon_xy = {6, 4},
+				multi_choice = biker_9_multi_choice
 			},
 			name_id = "menu_st_spec_16",
 			desc_id = "menu_st_spec_16_desc",
 			force_icon = 1,
-			category = "defensive",
+			category = {
+				"supportive",
+				"challenge"
+			},
 			dlc = "wild"
 		}
 
@@ -3391,7 +3605,8 @@ function SkillTreeTweakData:init(tweak_data)
 			deck2,
 			{
 				upgrades = {
-					"player_chico_injector_speed"
+					"player_chico_injector_speed",
+					"player_passive_dodge_chance_1"
 				},
 				cost = 400,
 				icon_xy = {1, 0},
@@ -3414,7 +3629,8 @@ function SkillTreeTweakData:init(tweak_data)
 			deck6,
 			{
 				upgrades = {
-					"player_chico_injector_low_health_multiplier"
+					"player_chico_injector_low_health_multiplier",
+					"player_passive_dodge_chance_2"
 				},
 				cost = 2400,
 				icon_xy = {3, 0},
@@ -3763,8 +3979,10 @@ function SkillTreeTweakData:init(tweak_data)
 					"temporary_copr_ability_1",
 					"copr_ability",
 					"player_copr_static_damage_ratio_1",
+					"player_copr_static_damage_ratio_mult_1",
 					"player_copr_kill_life_leech_1",
-					"player_copr_activate_bonus_health_ratio_1"
+					"player_copr_activate_bonus_health_ratio_1",
+					"player_wild_health_amount_1"
 				},
 				icon_xy = {
 					0,
@@ -3778,7 +3996,9 @@ function SkillTreeTweakData:init(tweak_data)
 				desc_id = "menu_deck22_3_desc_sc",
 				name_id = "menu_deck22_3",
 				upgrades = {
-					"player_copr_teammate_heal_1"		
+					"player_copr_teammate_heal_1",
+					"player_biker_armor_regen_1",
+					"player_passive_dodge_chance_1"
 				},
 				icon_xy = {
 					1,
@@ -3795,7 +4015,10 @@ function SkillTreeTweakData:init(tweak_data)
 					"temporary_copr_ability_2",
 					"player_copr_speed_up_on_kill_1",
 					"player_corpse_dispose_speed_multiplier",
-					"player_civ_move_multiplier"	
+					"player_civ_move_multiplier",
+					"player_less_armor_wild_cooldown_1",
+					"player_corpse_dispose_speed_multiplier",
+					"player_civ_move_multiplier"
 				},
 				icon_xy = {
 					0,
@@ -3810,7 +4033,10 @@ function SkillTreeTweakData:init(tweak_data)
 				name_id = "menu_deck22_7",
 				upgrades = {
 					"player_copr_static_damage_ratio_2",
-					"player_copr_kill_life_leech_2"
+					"player_copr_static_damage_ratio_mult_2",
+					"player_copr_kill_life_leech_2",
+					"player_biker_armor_regen_2",
+					"player_passive_dodge_chance_2"
 				},
 				icon_xy = {
 					3,
@@ -3826,7 +4052,9 @@ function SkillTreeTweakData:init(tweak_data)
 				upgrades = {
 					"player_activate_ability_downed",
 					"player_passive_loot_drop_multiplier_1",
-					"player_copr_teammate_heal_2"
+					"player_copr_teammate_heal_2",
+					"player_passive_loot_drop_multiplier_1",
+					"player_less_armor_wild_health_1"
 				},
 				icon_xy = {
 					1,

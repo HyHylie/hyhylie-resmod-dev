@@ -56,12 +56,13 @@ function MutatorsManager:init()
 		MutatorSpoocSquad:new(self),
 		MutatorOnlyTitans:new(self),
 		MutatorVanillaPoliceCall:new(self),
-		--MutatorFactionsReplacer:new(self),
+		--MutatorFactionReplacer:new(self),
 		MutatorBirthday:new(self),
 		MutatorReloadMarathon:new(self),
 		MutatorMagazineMartyr:new(self),
 		MutatorNoAmmoDrop:new(self),
 		--MutatorHighNoon:new(self)
+		MutatorAdvancedTraining:new(self),
 	}
 	self._active_mutators = {}
 	local activate = Global.mutators and Global.mutators.active_on_load

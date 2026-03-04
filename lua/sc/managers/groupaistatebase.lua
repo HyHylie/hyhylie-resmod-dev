@@ -327,6 +327,14 @@ function GroupAIStateBase:use_ponr_music()
 	return true
 end
 
+-- The vanilla function crashes rarely - not entirely sure why
+-- Guessing it might be possible for a client to start the PONR on their end before the host does?
+-- Either way, create the table if it doesn't exist yet instead of exploding
+Hooks:OverrideFunction(GroupAIStateBase, "set_is_inside_point_of_no_return", function(self, peer_id, is_inside, ...)
+	self._peers_inside_point_of_no_return = self._peers_inside_point_of_no_return or {}
+	self._peers_inside_point_of_no_return[peer_id] = is_inside
+end)
+
 Hooks:PreHook(GroupAIStateBase, "remove_point_of_no_return_timer", "res_remove_point_of_no_return_timer", function(self, point_of_no_return_id)
 	if setup:has_queued_exec() or self._point_of_no_return_id ~= point_of_no_return_id then
 		return
@@ -561,31 +569,34 @@ function GroupAIStateBase:_update_point_of_no_return(t, dt)
 	end
 end
 
+-- TODO: handling for instance bullshit
 function GroupAIStateBase:check_ponr_escape_area()
 	if not self._point_of_no_return_areas or setup:has_queued_exec() then
 		return
 	end
 
-	local function check_executed_objects(area_trigger, current, recursion_depth)
-		current = current or area_trigger
-		recursion_depth = recursion_depth or 2
+	local function check_executed_objects(current, checked)
+		if not current or checked[current] then
+			return
+		end
+
+		checked[current] = true
 
 		for _, params in pairs(current._values.on_executed) do
 			local element = current:get_mission_element(params.id)
 			local element_class = getmetatable(element)
 			if element_class == ElementMissionEnd then
 				return true
-			elseif recursion_depth > 0 and element_class == MissionScriptElement then
-				if check_executed_objects(area_trigger, element, recursion_depth - 1) then
-					return true
-				end
+			elseif check_executed_objects(element, checked) then
+				return true
 			end
 		end
 	end
 
+	local valid_classes = table.set(ElementAreaTrigger)
 	for _, script in pairs_g(managers.mission:scripts()) do
 		for _, element in pairs_g(script:elements()) do
-			if getmetatable(element) == ElementAreaTrigger and check_executed_objects(element) then
+			if valid_classes[getmetatable(element)] and check_executed_objects(element, {}) then
 				if not self._point_of_no_return_areas[1] or not table_contains(self._point_of_no_return_areas, element) then
 					self._point_of_no_return_areas[#self._point_of_no_return_areas + 1] = element
 				end
@@ -760,7 +771,7 @@ end
 
 --No longer increases with more players, also ignores converts.
 function GroupAIStateBase:has_room_for_police_hostage()
-	local nr_hostages_allowed = 4
+	local nr_hostages_allowed = 8
 
 	return nr_hostages_allowed > self._police_hostage_headcount
 end
@@ -768,6 +779,21 @@ end
 function GroupAIStateBase:num_converted_police()
 	return self._converted_police and table.size(self._converted_police) or 0
 end
+
+-- Normally this check is only done in `sync_hostage_headcount`, and it works fine in vanilla
+-- In Res, where converts also count, the interaction doesn't work as expected
+-- Probably `sync_hostage_headcount` comes before converts are registered as converts
+function GroupAIStateBase:_upd_hostage_absorption()
+	if managers.player:has_team_category_upgrade("damage", "hostage_absorption") then
+		local hostage_count = math.min(self._hostage_headcount + (self:num_converted_police() or managers.player:num_local_minions() or 0), tweak_data.upgrades.values.team.damage.hostage_absorption_limit)
+		local absorption = managers.player:team_upgrade_value("damage", "hostage_absorption", 0) * hostage_count
+
+		managers.player:set_damage_absorption("hostage_absorption", absorption)
+	end
+end
+
+Hooks:PostHook(GroupAIStateBase, "convert_hostage_to_criminal", "res_convert_hostage_to_criminal", GroupAIStateBase._upd_hostage_absorption)
+Hooks:PostHook(GroupAIStateBase, "remove_minion", "res_remove_minion", GroupAIStateBase._upd_hostage_absorption)
 
 function GroupAIStateBase:sync_hostage_headcount(nr_hostages)
 	if nr_hostages and self._hostage_headcount < nr_hostages then
@@ -780,12 +806,7 @@ function GroupAIStateBase:sync_hostage_headcount(nr_hostages)
 		managers.network:session():send_to_peers_synched("sync_hostage_headcount", math.min(self._hostage_headcount, 63))
 	end
 
-	if managers.player:has_team_category_upgrade("damage", "hostage_absorption") then
-		local hostage_count = math.min(self._hostage_headcount + (self:num_converted_police() or managers.player:num_local_minions() or 0), tweak_data.upgrades.values.team.damage.hostage_absorption_limit)
-		local absorption = managers.player:team_upgrade_value("damage", "hostage_absorption", 0) * hostage_count
-
-		managers.player:set_damage_absorption("hostage_absorption", absorption)
-	end
+	self:_upd_hostage_absorption()
 
 	managers.hud:set_control_info({
 		nr_hostages = self._hostage_headcount
@@ -1007,9 +1028,66 @@ function GroupAIStateBase:update(t, dt)
 	if self._last_detection_mul and self._last_detection_mul ~= self._old_guard_detection_mul_raw and Network:is_server() then 
 		LuaNetworking:SendToPeers("restoration_sync_level_suspicion",tostring(self._old_guard_detection_mul_raw) .. ":" .. tostring(self._weapons_hot_threshold))
 	end
-			
 	
-	
+	-- Update intimidated guards in stealth to check in with the pager operators
+	if is_whisper_mode then
+		-- You cannot use # to check the length of a table with non-sequential keys, but still, I only wanna dirty
+		-- the interaction text once per run through the intimidated guards.
+		local _has_dirtied_text_once_per_check = false
+
+		for index, data in pairs(managers.enemy:all_intimidated_guards()) do
+			-- While the alarm threshold is 0, the server won't sync it over. Until then, we'll just pretend we got the most amount
+			-- of suspicion possible to fill. _weapons_hot_threshold shouldn't ever be 0, but I'm starting to not trust PAYDAY code.
+			local temp_alarm_threshold =
+				(alarm_threshold ~= 0 and alarm_threshold)
+				or (self._weapons_hot_threshold ~= 0 and self._weapons_hot_threshold)
+				or 1
+
+			local vanilla_behaviour = managers.mutators:modify_value("CopMovement:VanillaPoliceCall", false)
+			local potential_sus_increase = math.max(math.min((tweak_data.stealth_intimidiated_checkin.limit * temp_alarm_threshold) - level_suspicion, tweak_data.stealth_intimidiated_checkin.penalty * temp_alarm_threshold), 0) -- Effectively clamps the value between 0 and as many as needed to reach the limit. Couldn't actually use math.clamp because limit-current can be negative.
+			local time_since_intimidation = t - data.t
+
+			local player_count = 1
+			if managers.network:session() then
+				player_count = table.size(managers.network:session():all_peers())
+			end
+			-- Theoretically supports big lobby mods if someone gets their jollies from 12 player stealth.
+			local time_til_checkin = tweak_data.stealth_intimidiated_checkin.time[math.clamp(player_count,1,#tweak_data.stealth_intimidiated_checkin.time)]
+
+			if not vanilla_behaviour and potential_sus_increase > 0 and time_since_intimidation > time_til_checkin then
+				if Network:is_server() then
+					self._old_guard_detection_mul_raw = self._old_guard_detection_mul_raw + potential_sus_increase
+					self._guard_detection_mul_raw = self._old_guard_detection_mul_raw
+					self._decay_target = self._old_guard_detection_mul_raw * 0.75
+					self._guard_delay_deduction = self._guard_delay_deduction + potential_sus_increase
+					self:_delay_whisper_suspicion_mul_decay()
+				end
+
+				if alive(data.unit) and data.unit:sound() then
+					data.unit:sound():stop()
+					data.unit:sound():play(data.unit:brain():_get_radio_id("dsp_radio_fooled_1"), nil, true)
+				end
+
+				data.t = data.t + time_since_intimidation
+			end
+
+			managers.enemy:update_intimidated_guard_hints(index, time_til_checkin - time_since_intimidation, potential_sus_increase / temp_alarm_threshold)
+			-- potential_sus_increase needs to be divided by alarm_threshold, as the suspicion increase is stored as an actual percentage
+			-- value of the overall suspicion meter visually, not as a percentage value of the internal numbers.
+			-- So this way, we get that back.
+
+			if potential_sus_increase == 0 and data.unit and alive(data.unit) and data.unit:base() and data.unit:interaction() and data.unit:interaction().tweak_data == "intimidated_guard_checkin" then
+				--  This is a comical amount of checks, but this goddamn if crashed the game with access violations so fucking much.
+				data.unit:interaction():set_tweak_data("intimidated_guard_checkin_pointless")
+			end
+
+			if alive(managers.interaction:active_unit()) and not _has_dirtied_text_once_per_check then
+				managers.interaction:active_unit():interaction():set_text_dirty(true)
+				_has_dirtied_text_once_per_check = true
+			end
+		end
+	end
+
 	if is_whisper_mode then
 		local warning_1_threshold = self._weapons_hot_threshold * 0.25
 		local warning_2_threshold = self._weapons_hot_threshold * 0.5

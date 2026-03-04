@@ -28,61 +28,23 @@ function FPCameraPlayerBase:init( unit )
 end
 --]]
 
+Hooks:RemovePostHook("immersive_fpcamera")
+Hooks:RemovePostHook("viewmodel_tweaks")
+Hooks:PostHook(FPCameraPlayerBase, "update", "ResBWAUpdate", function(self, unit, t, dt)
+	--putting this into a new function just so I can more easily do real-time changes without having to restart or override the whole function
+	self:_update_bwa(unit, t, dt)
+end)
 
-function FPCameraPlayerBase:update(unit, t, dt)
-	if self._tweak_data.aim_assist_use_sticky_aim then
-		self:_update_aim_assist_sticky(t, dt)
-	end
-
-	if _G.IS_VR and self._hmd_tracking and not self._block_input then
-		self._output_data.rotation = self._base_rotation * VRManager:hmd_rotation()
-	end
-
-	if not _G.IS_VR then
-		self._parent_unit:base():controller():get_input_axis_clbk("look", callback(self, self, "_update_rot"))
-	end
-
-	self:_update_stance(t, dt)
-	self:_update_movement(t, dt)
-
-	if managers.player:current_state() ~= "driving" then
-		self._parent_unit:camera():set_position(self._output_data.position)
-		self._parent_unit:camera():set_rotation(self._output_data.rotation)
-	else
-		self:_set_camera_position_in_vehicle()
-	end
-
-	if _G.IS_VR then
-		self:_update_fadeout(self._output_data.mover_position, self._output_data.position, self._output_data.rotation, t, dt)
-		self._parent_unit:camera():update_transform()
-	end
-
-	if self._fov.dirty then
-		self._parent_unit:camera():set_FOV(self._fov.fov)
-
-		self._fov.dirty = nil
-	end
-
-	if alive(self._light) then
-		local weapon = self._parent_unit:inventory():equipped_unit()
-
-		if weapon then
-			local object = weapon:get_object(Idstring("fire"))
-			local pos = object:position() + object:rotation():y() * 10 + object:rotation():x() * 0 + object:rotation():z() * -2
-
-			self._light:set_position(pos)
-			self._light:set_rotation(Rotation(object:rotation():z(), object:rotation():x(), object:rotation():y()))
-			World:effect_manager():move_rotate(self._light_effect, pos, Rotation(object:rotation():x(), -object:rotation():y(), -object:rotation():z()))
-		end
-	end
-
+function FPCameraPlayerBase:_update_bwa(unit, t, dt)
 	--Code originally from "Better Weapon Animations" by return and "Viewmodel Tweaks" by returnho
-	if restoration.Options:GetValue("WEAPONS/WEAPONANIMS/BWAResmod") then
-		local enable_bob = restoration.Options:GetValue("WEAPONS/WEAPONANIMS/BWAResmodBob")
-		local sway_style = restoration.Options:GetValue("WEAPONS/WEAPONANIMS/BWAResmodSway")
+	if restoration.Options:GetValue("BWAResOpt/BWAResmod") then
+		local enable_bob = restoration.Options:GetValue("BWAResOpt/BWAResmodBob")
+		local enable_bob_ads = restoration.Options:GetValue("BWAResOpt/BWAResmodBobADS")
+		local sway_style = restoration.Options:GetValue("BWAResOpt/BWAResmodSway")
 		local p_unit = self._parent_unit
 		local p_mov = self._parent_movement_ext
 		local p_cam = p_unit:camera()
+		local p_state = managers.player:current_state()
 		local p_equipped = p_unit:inventory():equipped_unit()
 		local wep_base = p_equipped and p_equipped.base and p_equipped:base()
 
@@ -102,7 +64,7 @@ function FPCameraPlayerBase:update(unit, t, dt)
 		local in_walk = not in_air and (in_wallrun or in_slide or in_dash or mvector3.length(input_axis) ~= 0)
 		local in_run = in_walk and (in_dash or p_mov:running())
 		
-		local deltaT = math.max(dt, .0016)
+		local deltaT = math.clamp(dt, .0016, .05) --clamp dt so FPS spikes (or low fps) don't make the viewmodel fly off
 		local lp_speed = 16 * deltaT
 		local t_pi_2 = t * math.pi * 2
 
@@ -128,9 +90,8 @@ function FPCameraPlayerBase:update(unit, t, dt)
 		-----------------------------------------------------------------------------------------------------------------------------
 
 		local mov_lp_speed = deltaT * 5.5
-		local run_mul = in_run and 1.65 or 1
-		--disabled viewbob for walking and running for now as it doesn't play nice with camera viewbob
-		local mov_mul = (enable_bob and (in_sight and 0.15)) or 0 --(in_run and 3.65 or 1.75)
+		local run_mul = in_slide and 0 or in_run and 1.65 or 1
+		local mov_mul = (enable_bob_ads and in_sight and 0.15) or (enable_bob and not in_sight and 1.75) or 0
 
 		mov_pos = mov_pos or Vector3()
 		mov_ang = mov_ang or Rotation()
@@ -139,20 +100,70 @@ function FPCameraPlayerBase:update(unit, t, dt)
 
 		-----------------------------------------------------------------------------------------------------------------------------
 
+		local pitch_lp_speed = (deltaT * 8) * ((in_sight and not in_full_sight and 2) or 1)
 		look_pos = look_pos or Vector3()
 
-		mvector3.lerp(look_pos, look_pos, (not in_sight) and Vector3(0, 0, -unit:rotation():pitch() / 48) or Vector3(), lp_speed)
+		local pitch = unit:rotation():pitch()
+		local up_mul = 1.5
+		local down_mul = 1
+		local pitch_mul = pitch > 0 and up_mul or down_mul
+
+		mvector3.lerp(look_pos, look_pos, (not in_sight) and Vector3(0, 0, -(pitch * pitch_mul) / 48) or Vector3(), pitch_lp_speed)
 		
+		-----------------------------------------------------------------------------------------------------------------------------
+
+		--ADS tilt
+		ads_tilt_pos = ads_tilt_pos or Vector3()
+		ads_tilt_ang = ads_tilt_ang or Rotation()
+
+		local res_ads_style = restoration.Options:GetValue("BWAResOpt/BWAResADSTransitionStyle") or 1
+		local is_akimbo = wep_base and wep_base.AKIMBO
+		local ignore_transition_styles = wep_base and wep_base:weapon_tweak_data().ign_ts
+
+		if res_ads_style ~= 1 and not is_akimbo and not ignore_transition_styles and p_state ~= "bipod" then
+			ads_tilt_progress = ads_tilt_progress or 0
+			ads_tilt_target_ang = ads_tilt_target_ang or Rotation()
+			ads_tilt_target_pos = ads_tilt_target_pos or Vector3()
+			local ads_tilt_lp_speed = deltaT * 8 * ((in_full_sight and 1.5) or 1)
+			local steelsight_t = wep_base and (tweak_data.player.TRANSITION_DURATION / wep_base:enter_steelsight_speed_multiplier() / wep_base:second_sight_steelsight_mult()  ) or 0.2
+			if in_sight and not in_full_sight then
+			    ads_tilt_progress = math.min(ads_tilt_progress + dt, steelsight_t * 0.5)
+			elseif not in_sight then
+			    ads_tilt_progress = math.max(ads_tilt_progress - dt, 0)
+			end
+
+			local tilt_pow = 0
+			if ads_tilt_progress > 0 then
+			    tilt_pow = math.clamp(1 - (ads_tilt_progress / (steelsight_t * 0.5)), 0, 1)
+			end
+			if not in_sight then
+				tilt_pow = 0
+			end
+			--tilt_pow = tilt_pow / pitch_mul
+
+			if res_ads_style == 2 then
+				ads_tilt_target_ang = Rotation(-0.5 * tilt_pow, 0.5 * tilt_pow, 20 * tilt_pow)
+				ads_tilt_target_pos = Vector3(3 * tilt_pow, 2 * tilt_pow, 1.5 * tilt_pow)
+			else
+				ads_tilt_target_ang = Rotation(0.2 * tilt_pow, 0 * tilt_pow, -20 * tilt_pow)
+				ads_tilt_target_pos = Vector3(0 * tilt_pow, 5 * tilt_pow, -3 * tilt_pow)
+			end
+			mrotation.slerp(ads_tilt_ang, ads_tilt_ang, ads_tilt_target_ang, ads_tilt_lp_speed * ((tilt_pow == 0 and 1.2) or 1))
+			mvector3.lerp(ads_tilt_pos, ads_tilt_pos, ads_tilt_target_pos, ads_tilt_lp_speed * ((tilt_pow == 0 and 1.2) or 1))
+		end
+
 		-----------------------------------------------------------------------------------------------------------------------------
 
 		--Added a slight downward offset on the viewmodel when moving
 		--Added a speed-up to re-center when in the process of aiming
-		local tilt_lp_speed = deltaT * 5.5
+		local tilt_lp_speed = (deltaT * 5.5) * ((in_sight and not in_full_sight and 2) or 1)
+		local tilt_str = restoration.Options:GetValue("BWAResOpt/BWAResmodTiltStr") or 0.45
+		local in_sight_tilt_str = restoration.Options:GetValue("BWAResOpt/BWAResmodADSTiltStr") or 0.03
 
 		tilt_pos = tilt_pos or Vector3()
 		tilt_ang = tilt_ang or Rotation()
-		mvector3.lerp(tilt_pos, tilt_pos, (not in_air) and Vector3((not in_sight and 16 or 0.5) * input_axis.x / 16, 0, ((not in_sight and 2.25 or 0.4) * input_axis.x / 2) + -math.abs(((in_walk and 1.15 or 0) * (in_run and 1.5 or 1)) * (not in_sight and 2 or 0))) or Vector3(), tilt_lp_speed * ((in_sight and not in_full_sight and 4) or 1))
-		mrotation.slerp(tilt_ang, tilt_ang, (not in_air) and Rotation(0, 0, (not in_sight and 2.25 or 0.5) * input_axis.x * 2.625 * (in_run and 2 or 1))  or Rotation(), tilt_lp_speed * ((in_sight and not in_full_sight and 4) or 1))
+		mvector3.lerp(tilt_pos, tilt_pos, (not in_air) and Vector3((not in_sight and 16 or 0.5) * input_axis.x / 16, 0, ((not in_sight and 2.25 or 0.5) * input_axis.x / 2) + -math.abs(((in_walk and 1.15 or 0) * (in_run and 1.5 or 1)) * (not in_sight and 2 or 0))) or Vector3(), tilt_lp_speed)
+		mrotation.slerp(tilt_ang, tilt_ang, (not in_air) and Rotation(0, 0, (not in_sight and 2.25 or 0.5) * input_axis.x * 2.625 * (in_run and 2 or 1))  or Rotation(), tilt_lp_speed)
 		
 		-----------------------------------------------------------------------------------------------------------------------------
 
@@ -181,7 +192,9 @@ function FPCameraPlayerBase:update(unit, t, dt)
 		last_p_rot = last_p_rot or Rotation()
 
 		local p_rot_diff = Rotation(p_rot:yaw() - last_p_rot:yaw(), p_rot:pitch() - last_p_rot:pitch(), p_rot:roll() - last_p_rot:roll())
-		local sway_range = (not in_sight and 0.45 or 0.035) * ((sway_style and -1) or 1)
+		local sway_str = restoration.Options:GetValue("BWAResOpt/BWAResmodSwayStr") or 0.45
+		local in_sight_sway_str = restoration.Options:GetValue("BWAResOpt/BWAResmodADSSwayStr") or 0.03
+		local sway_range = (sway_str * (in_sight and in_sight_sway_str or 1)) * ((sway_style and -1) or 1)
 		sway_range = sway_range / (((sway_style and wep_base) and math.min(wep_base._movement_penalty, 1)) or 1)
 		p_rot_diff_yaw = p_rot_diff_yaw and math.clamp(p_rot_diff:yaw(), -5, 5) * sway_range or 0
 		p_rot_diff_pitch = p_rot_diff_pitch and math.clamp(p_rot_diff:pitch(), -5, 5) * sway_range or 0
@@ -219,11 +232,25 @@ function FPCameraPlayerBase:update(unit, t, dt)
 
 		-----------------------------------------------------------------------------------------------------------------------------
 
-		mvector3.set(self._vel_overshot.translation, mov_pos + look_pos + tilt_pos + jump_pos + sway_pos + wall_pos)
+		mvector3.set(self._vel_overshot.translation, mov_pos + look_pos + tilt_pos + jump_pos + sway_pos + wall_pos + ads_tilt_pos)
 		mrotation.set_zero(self._vel_overshot.rotation)
-		mrotation.multiply(self._vel_overshot.rotation, mov_ang * tilt_ang * sway_ang)
+		mrotation.multiply(self._vel_overshot.rotation, mov_ang * tilt_ang * sway_ang * ads_tilt_ang)
 	end
 end
+
+Hooks:PreHook(FPCameraPlayerBase, "clbk_stance_entered", "BWA_ZeroOvershot", function(self, new_shoulder_stance, new_head_stance, new_vel_overshot, new_fov, new_shakers, stance_mod, duration_multiplier, duration, head_duration_multiplier, head_duration)
+	local bwa = restoration.Options:GetValue("BWAResOpt/BWAResmod")
+	local static_aim = restoration.Options:GetValue("WEAPONS/WEAPONANIMS/StaticAim") and self._parent_unit:movement()._current_state:in_steelsight()
+	if new_vel_overshot and (bwa or static_aim) then
+		new_vel_overshot.yaw_neg = 0
+		new_vel_overshot.yaw_pos = 0
+		new_vel_overshot.pitch_neg = 0
+		new_vel_overshot.pitch_pos = 0
+	end
+	if new_shakers and new_shakers.breathing and static_aim then
+		new_shakers.breathing.amplitude = 0
+	end
+end)
 
 --Add limit constraints to recoil, to allow for recoil to occur with a bipod.
 function FPCameraPlayerBase:_update_movement(t, dt)
@@ -420,7 +447,7 @@ end
 
 --Add more recoil to burn through.
 --Also no longer arbitrarily caps vertical recoil.
-function FPCameraPlayerBase:recoil_kick(up, down, left, right, min_h_recoil)
+function FPCameraPlayerBase:recoil_kick(up, down, left, right, min_h_recoil, last_recoil_mult, last_recoil_mult_h)
 	local player_state = managers.player:current_state()
 	if player_state == "bipod" then
 		up = up * 0.5
@@ -428,6 +455,9 @@ function FPCameraPlayerBase:recoil_kick(up, down, left, right, min_h_recoil)
 		left = left * 0.25
 		right = right * 0.25
 	end
+
+	self._last_recoil_mult = math.max(1, last_recoil_mult or 1)
+	self._last_recoil_mult_h = math.max(1, last_recoil_mult_h or 1)
 
 	local v = math.lerp(up, down, math.random())
 	self._recoil_kick.accumulated = (self._recoil_kick.accumulated or 0) + v
@@ -448,12 +478,13 @@ function FPCameraPlayerBase:_vertical_recoil_kick(t, dt)
 	if enable_recoil_recover and enable_recoil_recover == 3 then
 		center_speed = math.max(center_speed * 0.75, 1)
 	end
-	local recoil_speed = math.max(weapon and weapon:base()._recoil_speed[1] or 80, 0)
+	local recoil_mult = self._last_recoil_mult or 1
+	local recoil_speed = (math.max(weapon and weapon:base()._recoil_speed[1] or 80, 0) / 3) * recoil_mult
 	if player_state and player_state:in_air() then
 		recoil_speed = recoil_speed * 1.25
 	end
 	if enable_recoil_recover == 1 and self._recoil_kick.accumulated and self._episilon < math.abs(self._recoil_kick.accumulated) then
-		local degrees_to_move = 80 * dt --Move camera 80 degrees per second, increased speed over the vanilla 40 to reduce "ghost" recoil
+		local degrees_to_move = recoil_speed * dt --Move camera 80 degrees per second, increased speed over the vanilla 40 to reduce "ghost" recoil
 		r_value = math.min(self._recoil_kick.accumulated, degrees_to_move)
 		self._recoil_kick.accumulated = self._recoil_kick.accumulated - r_value
 	elseif enable_recoil_recover ~= 1 and self._recoil_kick.current and self._recoil_kick.accumulated - ((enable_recoil_recover ~= 1 and self._recoil_kick.current) or 0) > self._episilon then
@@ -492,12 +523,13 @@ function FPCameraPlayerBase:_horizonatal_recoil_kick(t, dt)
 	if enable_recoil_recover and enable_recoil_recover == 3 then
 		center_speed = math.max(center_speed * 0.75, 1)
 	end
-	local recoil_speed = math.max(weapon and weapon:base()._recoil_speed[2] or 60, 0)
+	local recoil_mult = self._last_recoil_mult_h or 1
+	local recoil_speed = (math.max(weapon and weapon:base()._recoil_speed[2] or 60, 0) / 3) * recoil_mult
 	if player_state and player_state:in_air() then
 		recoil_speed = recoil_speed * 1.25
 	end
 	if enable_recoil_recover == 1 and self._recoil_kick.h.accumulated and self._episilon < math.abs(self._recoil_kick.h.accumulated) then
-		local degrees_to_move = 60 * dt 
+		local degrees_to_move = recoil_speed * dt 
 		r_value = math.min(self._recoil_kick.h.accumulated, degrees_to_move)
 		self._recoil_kick.h.accumulated = self._recoil_kick.h.accumulated - r_value
 	elseif enable_recoil_recover ~= 1 and self._recoil_kick.h.current and math.abs(self._recoil_kick.h.accumulated - ((enable_recoil_recover ~= 1 and self._recoil_kick.h.current) or 0)) > self._episilon then
@@ -544,13 +576,16 @@ function FPCameraPlayerBase:play_redirect(redirect_name, speed, offset_time)
 				return 
 			end
 			if redirect_name == ANIM_STATES.standard.recoil_steelsight or redirect_name == ANIM_STATES.standard.recoil then
-				if weap_base._starwars then
+				if weap_base._starwars and not weap_base._starwars.allow_anim_mults then
 					speed = 1
 				else
 					speed = weap_base:fire_rate_multiplier( weap_base._ignore_rof_mult_anims or true_semi and weap_base._ignore_rof_mult_anims_semi )
 				end
 				if weap_base:weapon_tweak_data() and weap_base:weapon_tweak_data().fake_semi_anims then
 					redirect_name = Idstring("recoil_exit")
+				end
+				if weap_base:weapon_tweak_data() and weap_base:weapon_tweak_data().no_steelsight_anims then
+					redirect_name = Idstring("recoil")
 				end
 			end
 			--[[
@@ -596,20 +631,34 @@ function FPCameraPlayerBase:play_anim_melee_item(tweak_name, speed_multiplier)
 		self._melee_item_anim = nil
 	end
 
-	local ids = anim_data.anim and Idstring(anim_data.anim)
+	local anim_ids = anim_data.anim and Idstring(anim_data.anim)
 
-	if ids then
+	if anim_ids then
 		for _, unit in ipairs(self._melee_item_units) do
-			local length = unit:anim_length(ids)
+			local anim_length = unit:anim_length(anim_ids)
 
 			if anim_data.loop then
-				unit:anim_play_loop(ids, 0, length, 1)
+				unit:anim_play_loop(anim_ids, 0, anim_length, 1)
 			else
-				unit:anim_play_to(ids, length, speed_multiplier or 1)
+				if anim_data.from then
+					unit:anim_set_time(anim_ids, anim_data.from)
+				end
+
+				unit:anim_play_to(anim_ids, anim_length, speed_multiplier or 1)
+			end
+
+			if type(anim_data.start_time) == "number" then
+				local start_time = anim_data.start_time
+
+				if start_time == -1 then
+					start_time = anim_length
+				end
+
+				unit:anim_set_time(start_time)
 			end
 		end
 
-		self._melee_item_anim = ids
+		self._melee_item_anim = anim_ids
 	end
 end
 
@@ -629,7 +678,12 @@ local bezier_values2 = {
 --Still wonky when swapping to your main optic (culls too early)
 --Also stuff to make ADS transitions less "on-rails"
 Hooks:PostHook(FPCameraPlayerBase, "_update_stance", "ResFixSecondSight", function(self, t, dt)
-	if self._shoulder_stance.transition then
+	--putting this into a new function just so I can more easily do real-time changes
+	self:_update_res_stance( t, dt)
+end)
+
+function FPCameraPlayerBase:_update_res_stance(t, dt)
+	if self._shoulder_stance.transition and not restoration.Options:GetValue("BWAResOpt/BWAResmod") then
 		local trans_data = self._shoulder_stance.transition
 		local elapsed_t = t - trans_data.start_t
 		local player_state = managers.player:current_state()
@@ -673,16 +727,16 @@ Hooks:PostHook(FPCameraPlayerBase, "_update_stance", "ResFixSecondSight", functi
 
 			self._shoulder_stance.rotation = trans_data.start_rotation:slerp(trans_data.end_rotation, progress_smooth)
 
-			if restoration and restoration.Options:GetValue("WEAPONS/WEAPONANIMS/ADSTransitionStyle") and restoration.Options:GetValue("WEAPONS/WEAPONANIMS/ADSTransitionStyle") ~= 1 and not is_akimbo and not ignore_transition_styles then
+			if restoration and restoration.Options:GetValue("WEAPONS/WEAPONANIMS/ADSTransitionStyle") and restoration.Options:GetValue("WEAPONS/WEAPONANIMS/ADSTransitionStyle") ~= 1 and not is_akimbo and not ignore_transition_styles and not restoration.Options:GetValue("BWAResOpt/BWAResmod") then
 				local temp = not self._steelsight_swap_state --and (not in_second_sight or (in_second_sight and not in_steelsight))
 				if player_state and player_state ~= "bipod" and trans_data.absolute_progress and temp then
-					local prog = (1 - absolute_progress) * (dt * 100)
+					local prog = (1 - absolute_progress) * (dt * math.clamp(120 * weapon_base:enter_steelsight_speed_multiplier(), 0.1, 120))
 					if self._shoulder_stance.was_in_steelsight and not in_steelsight then
 						self._shoulder_stance.was_in_steelsight = nil
 						self._shoulder_stance.was_in_second_sight = nil
 						prog = absolute_progress * (dt * 100)
 						trans_data.start_translation = trans_data.start_translation + Vector3(1 * prog, 0.5 * prog, 1 * prog)
-						trans_data.start_rotation = trans_data.start_rotation * Rotation(0 * prog, 0 * prog, 2.5 * prog)
+						trans_data.start_rotation = trans_data.start_rotation * Rotation(0 * prog, 0 * prog, 1.5 * prog)
 					elseif in_steelsight and in_full_steelsight ~= true then
 						if speen then
 							trans_data.start_translation = trans_data.start_translation + Vector3(0.5 * prog, 0.5 * prog, -0.2 * prog)
@@ -691,7 +745,7 @@ Hooks:PostHook(FPCameraPlayerBase, "_update_stance", "ResFixSecondSight", functi
 							trans_data.start_translation = trans_data.start_translation + Vector3(0.5 * prog, 0.5 * prog, -0.2 * prog)
 							trans_data.start_rotation = trans_data.start_rotation * Rotation(0 * prog, 0 * prog, 1.25 * prog)
 						elseif restoration.Options:GetValue("WEAPONS/WEAPONANIMS/ADSTransitionStyle") == 3 then
-							trans_data.start_translation = trans_data.start_translation + Vector3(-0.5 * prog, 0.5 * prog, -0.5 * prog)
+							trans_data.start_translation = trans_data.start_translation + Vector3(-0.2 * prog, 0.5 * prog, -0.2 * prog)
 							trans_data.start_rotation = trans_data.start_rotation * Rotation(0 * prog, 0 * prog, -1.25 * prog)
 						end
 					end
@@ -700,7 +754,7 @@ Hooks:PostHook(FPCameraPlayerBase, "_update_stance", "ResFixSecondSight", functi
 
 		end
 	end
-end)
+end
 
 --For controllers
 function FPCameraPlayerBase:setSnapSpeed(value)

@@ -21,6 +21,10 @@ function EquipmentsTweakData:init()
 	self.ecm_jammer.deploy_time = 1
 	self.specials.cable_tie.quantity = 3
 	self.specials.cable_tie.max_quantity = 3
+
+	-- Ammo-box based pickup chances, exact same logic as with throwables
+	self.trip_mine.pickup_low = 0.008
+	self.trip_mine.pickup_high = 0.0133
 	
 	self.sentry_gun.repair_time_init = 60
 	self.sentry_gun.repair_time_min = 10
@@ -37,7 +41,7 @@ function EquipmentsTweakData:init()
 		asset_grenade_crate = 3,
 		first_aid_kit = 9,
 		asset_bodybags_bag = 4,
-		grenade_crate = 1,
+		grenade_crate = 2,
 		bodybags_bag = 2,
 		sentry_gun = -1,
 		doctor_bag = 2

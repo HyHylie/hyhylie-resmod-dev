@@ -62,19 +62,18 @@ Hooks:Add("NetworkReceivedData", "SyncEnv", function(sender, id, data)
 end)
 
 tweak_data.upgrades.values.player.body_armor.armor[9] = 25
-tweak_data.upgrades.values.player.body_armor.movement[9] = 0.4
+tweak_data.upgrades.values.player.body_armor.movement[9] = 0.5875
 tweak_data.upgrades.values.player.body_armor.dodge[9] = -0.5
 tweak_data.upgrades.values.player.body_armor.concealment[9] = -2
 tweak_data.upgrades.values.player.body_armor.damage_shake[9] = 0.1
-tweak_data.upgrades.values.player.body_armor.stamina[9] = 0.3
-tweak_data.upgrades.values.player.body_armor.skill_ammo_mul[9] = 1.15
+tweak_data.upgrades.values.player.body_armor.stamina[9] = 0.4
+tweak_data.upgrades.values.player.body_armor.skill_ammo_mul[9] = 1.175
 tweak_data.upgrades.values.player.body_armor.regen_delay[9] = 5.5
-tweak_data.upgrades.values.player.body_armor.deflection[9] = 0.00
-tweak_data.upgrades.values.player.body_armor.dodge_grace[9] = 1
+tweak_data.upgrades.values.player.body_armor.deflection[9] = 0.10
 tweak_data.upgrades.values.player.body_armor.skill_max_health_store[9] = 0.2
 tweak_data.upgrades.values.player.body_armor.skill_kill_change_regenerate_speed[9] = 1.01
 tweak_data.upgrades.values.player.armor_grinding[1][9] = {5.8, 7.25}
-tweak_data.upgrades.values.player.damage_to_armor[1][9] = {10.4, 5}
+tweak_data.upgrades.values.player.damage_to_armor[1][9] = {11.2, 5}
 
 if GGWEPNENAME then
 	local mod_ids = Idstring("Weapon Rename"):key()
@@ -359,4 +358,47 @@ if GGWEPNENAME then
 		end
 		return data.name_localized
 	end)
+end
+
+--This stuff needs to load late as to override the hooks from their respective mods
+if SKSWeaponBase then
+	function SKSWeaponBase:clbk_assembly_complete(...)
+		SKSWeaponBase.super.clbk_assembly_complete(self, ...)
+		if table.contains(self._blueprint, "wpn_fps_upg_sks_mag_detach10") or table.contains(self._blueprint, "wpn_fps_upg_sks_mag_detach20") then
+			self:weapon_tweak_data().animations.reload_name_id = "sks_mag"
+		else
+			self:weapon_tweak_data().animations.reload_name_id = "sks"
+		end
+	end
+end
+
+if OWLFBullpupWeaponBase then
+	function OWLFBullpupWeaponBase:clbk_assembly_complete(...)
+		OWLFBullpupWeaponBase.super.clbk_assembly_complete(self, ...)
+		if table.contains(self._blueprint, "wpn_fps_upg_owlfbullpup_mag_drum") then
+			self:weapon_tweak_data().animations.reload_name_id = "owlfbullpup_drum"
+		else
+			self:weapon_tweak_data().animations.reload_name_id = "owlfbullpup"
+		--[[
+			self:weapon_tweak_data().timers.reload_empty = 4.8
+			self:weapon_tweak_data().timers.reload_not_empty = 3.0
+		--]]
+		end
+	end
+end
+
+if StalkerGaussWeaponBase then
+	function StalkerGaussWeaponBase:fire(...)
+		local ray_res = NewRaycastWeaponBase.super.fire(self, ...)
+		if self._icws_extensions then
+			--local ammo_max = self:get_ammo_max_per_clip()
+			local ammo_current = self:get_ammo_remaining_in_clip()
+			local fire_rate = self:weapon_fire_rate()
+			
+			for k,icws in pairs(self._icws_extensions) do 
+				icws:animate_charge_meter(ammo_current,fire_rate)
+			end
+		end
+		return ray_res
+	end
 end

@@ -8,12 +8,12 @@ local dw_pj_above = difficulty >= 7 and pro_job
 
 local street_spawn = {
 	values = {
-		interval = 5,
+		interval = 20,
 	},
 }
 local wall_spawn = {
 	values = {
-		interval = 10,
+		interval = 20,
 	},
 }
 local rear_spawn = {
@@ -115,6 +115,12 @@ return {
 		on_executed = {
 			{ id = 106539, remove = true },
 			{ id = 400005, delay = 0, delay_rand = 5 },
+		},
+	},
+	-- Small beat cop wave 
+	[106265] = {
+		on_executed = {
+			{id = 400010, delay = 12, delay = 2},
 		},
 	},
 	-- tweak the ambush near the end

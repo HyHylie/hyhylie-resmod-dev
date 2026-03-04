@@ -3,11 +3,13 @@ function ArrowBase:_setup_from_tweak_data(arrow_entry)
 	local tweak_entry = tweak_data.projectiles[arrow_entry]
 	self._damage_class_string = tweak_data.projectiles[self._tweak_projectile_entry].bullet_class or "InstantBulletBase"
 	self._damage_class = CoreSerialize.string_to_classtable(self._damage_class_string)
+	self._magnetism = tweak_data.projectiles[self._tweak_projectile_entry].magnetism or 0.15
 	self._mass_look_up_modifier = tweak_entry.mass_look_up_modifier
 	self._damage = tweak_entry.damage or 1
 	self._slot_mask = managers.slot:get_mask("arrow_impact_targets")
 	self._slot_mask = self._slot_mask - World:make_slot_mask(16)
 end
+
 
 local tmp_vel = Vector3()
 
@@ -32,16 +34,26 @@ function ArrowBase:update(unit, t, dt)
 
 	if not self._is_pickup then
 		local autohit_dir = self:_calculate_autohit_direction()
-
-		if autohit_dir and self._damage_class_string ~= "InstantExplosiveBulletBase" and self._damage_class_string ~= "InstantSnowballBase"  then
+		local res_magnetism = restoration.Options:GetValue("WEAPONS/WeaponHandling/ProjectileMagnetism")
+		if autohit_dir and self._damage_class_string ~= "InstantExplosiveBulletBase" and self._damage_class_string ~= "InstantSnowballBase" and res_magnetism then
 			local body = self._unit:body(0)
 
 			mvector3.set(tmp_vel, body:velocity())
 
 			local speed = mvector3.normalize(tmp_vel)
 
-			mvector3.step(tmp_vel, tmp_vel, autohit_dir, dt * 0.15)
+			mvector3.step(tmp_vel, tmp_vel, autohit_dir, dt * self._magnetism)
 			body:set_velocity(tmp_vel * speed)
+
+			if tweak_data.projectiles[self._tweak_projectile_entry].push_at_body_index ~= 0 then
+				local body_2 = self._unit:body(tweak_data.projectiles[self._tweak_projectile_entry].push_at_body_index)
+				mvector3.set(tmp_vel, body_2:velocity())
+
+				local speed = mvector3.normalize(tmp_vel)
+
+				mvector3.step(tmp_vel, tmp_vel, autohit_dir, dt * self._magnetism)
+				body_2:set_velocity(tmp_vel * speed)
+			end
 		end
 	end
 
@@ -91,8 +103,34 @@ function ArrowBase:_calculate_autohit_direction()
 	end
 end	
 
+function ArrowBase:_on_collision(col_ray)
+	local damage_mult = self._weapon_damage_mult or 1
+	local loose_shoot = self._weapon_charge_fail
+
+	if not loose_shoot and alive(col_ray.unit) then
+		local client_damage = self._damage_class.is_explosive_bullet or alive(col_ray.unit) and col_ray.unit:id() ~= -1
+		local is_explosive_bullet = self._damage_class.is_explosive_bullet
+		if Network:is_server() or client_damage then
+			self._damage_class:on_collision(col_ray, self._weapon_unit or self._unit, self._thrower_unit, self._damage * ((not is_explosive_bullet and damage_mult) or 1), false, false, damage_mult)
+		end
+	end
+
+	if not loose_shoot and tweak_data.projectiles[self._tweak_projectile_entry].remove_on_impact then
+		self._unit:set_slot(0)
+
+		return
+	end
+
+	self._unit:body("dynamic_body"):set_deactivate_tag(Idstring())
+
+	self._col_ray = col_ray
+
+	self:_attach_to_hit_unit(nil, loose_shoot)
+end
+
+
 Hooks:PostHook(ArrowBase, "reload_contour", "reload_contour_arrow_mutator_no_outlines", function(self)
-    local disable_outlines = managers.mutators:modify_value("ArrowBase:DisableOutlines", false)
+    local disable_outlines = managers.mutators:modify_value("ArrowBase:DisableAmmoPickupOutlines", false)
 	if disable_outlines then
 		if self._unit:contour() and managers.user:get_setting("throwable_contour") then
 			self._unit:contour():_upd_opacity(self._attached_to_unit and 0)

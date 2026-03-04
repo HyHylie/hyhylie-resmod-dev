@@ -165,6 +165,10 @@ function restoration:Init()
 		Gensec_HQ = restoration.captain_types.autumn, --Gensec HQ Raid day 2
 		hwu = restoration.captain_types.autumn, -- Avalon's Shadow
 		skm_firestarter_2 = restoration.captain_types.autumn,--FBI Holdout
+		skm_tbh = restoration.captain_types.autumn,--TBA Holdout
+		money_tbh = restoration.captain_types.autumn,--TBA Heist
+		skm_tbh_xmas = restoration.captain_types.autumn,--TBA Holdout
+		money_tbh_xmas = restoration.captain_types.autumn,--TBA Heist
 
 		--I'm not typing out the whole name
 		help = restoration.captain_types.hvh, --Prison Nightmare
@@ -241,7 +245,6 @@ function restoration:Init()
 		"crojob2", --Bomb Dockyard
 		"friend", --Scarface Mansion
 		"kenaz", --Golden Grin Casino
-		"peta", --Goatsim 1
 		"watchdogs_2_day", --Watchdogs Day 2
 		"watchdogs_2", --Watchdogs Day 2 but night
 		"bex", --San Martin Bank
@@ -279,6 +282,7 @@ function restoration:Init()
 	--Slightly reduced spawns, generally use for heists with lengthy sections where players typically hold out in one smallish position, or 'early game' heists.
 	restoration.tiny_levels = {
 		"welcome_to_the_jungle_2", --Big Oil 2. Scripted cloaker hell.
+		"peta", --Goatsim 1
 		"arena", -- Alesso Heist
 		"cane", --Santa's Workshop
 		"brb", --Brooklyn Bank
@@ -351,9 +355,11 @@ function restoration:Init()
 		"hogar",-- The House Robbery
 		"icing",	--Road Rage
 		"gunw_lvl",  -- Gun Waashing
-		"R&amp;B Bank" -- RNB Bank (Notoriety port)
-
-
+		"R&amp;B Bank", -- RNB Bank (Notoriety port)
+		"skm_tbh", --TBA
+		"skm_tbh_xmas", --TBA
+		"money_tbh", --TBA
+		"money_tbh_xmas" --TBA
 	}
 	--For levels that have aggressive scripted spawns, or spawn placement such that enemies are constantly spawned next to players.
 	restoration.very_tiny_levels = {
@@ -746,6 +752,11 @@ restoration.ponrtracks = {
 	"random"
 }
 
+restoration.snd_raffica = {
+	"snd_raffica_vanilla",
+	"snd_raffica_b92fs",
+	"snd_raffica_combo"
+}
 restoration.snd_sw500 = {
 	"snd_sw500_vanilla",
 	"snd_sw500_peacemaker",
@@ -924,6 +935,20 @@ function restoration:disable_mission_script_patches()
 			return true
 		end
 	end
+end
+
+-- Always return a complete patch in case of a specific dialogue element needing other changes as well
+function restoration:get_can_not_be_muted_patch(value)
+	if value == true or value == false then
+		-- Nothing
+	else
+		value = self.Options:GetValue("OTHER/ExtraUnmuteables") and true or nil
+	end
+	return {
+		values = {
+			can_not_be_muted = value,
+		},
+	}
 end
 
 -- Load and execute a file from the req/ folder
@@ -1481,9 +1506,15 @@ function restoration:gen_ai_global_event(id, name, pos, rot, opts)
 	}
 end
 
-function restoration:gen_object_editor_trigger(id, name, pos, rot, opts)
+---Generate an object editor trigger
+---@param id number: id of element, start from 400000
+---@param name string: name of element for reference
+---@param pos Vector3: position for the element to be in
+---@param rot Rotation: direction the element is facing
+---@param opts? table: extra parameters
+function restoration:object_editor_trigger(id, name, opts)
 	opts = opts or {}
-	return {
+	local object_editor_trigger = {
 		id = id,
 		editor_name = name,
 		module = "CoreElementUnitSequenceTrigger",
@@ -1495,10 +1526,61 @@ function restoration:gen_object_editor_trigger(id, name, pos, rot, opts)
 			on_executed = opts.on_executed or {},
 			base_delay = opts.base_delay or 0,
 			enabled = opts.enabled or false,
+			callback = opts.callback or false,
 		},
 	}
+
+	return object_editor_trigger
 end
 
+---Generate a elementspecialobjectivegroup element
+---@param id number: id of element, start from 400000
+---@param name string: name of element for reference
+---@param opts? table: extra parameters
+function restoration:gen_sogroup(id, name, pos, rot, opts)
+	opts = opts or {}
+	local sogroup = {
+		id = id,
+		editor_name = name,
+		class = "ElementSpecialObjectiveGroup",
+		values = {
+			execute_on_startup = false,
+			position = pos,
+			rotation = rot,
+			use_instigator = false,
+			base_delay = opts.base_delay or 0,
+			base_chance = opts.base_chance or 1,
+			trigger_times = opts.trigger_times or 0,
+			mode = opts.mode or "recurring_cloaker_spawn",
+			followup_elements = opts.followup_elements or {},
+			on_executed = opts.on_executed or {},
+			enabled = true,
+			callback = opts.callback or false,
+		},
+	}
+	return sogroup
+end
+-- Based on Bank Heist's hiding Cloaker SO setup
+-- search_position must be the same for all GroupAI hiding SOs
+-- interrupt_dis is in meters
+-- The SO group element must also be in AI navigation (or at least able to be found by GroupAI)
+function restoration.get_hiding_cloaker_so_opts(so_action, search_position, interrupt_dis)
+	return {
+		SO_access = "1024",
+		scan = true,
+		align_position = true,
+		needs_pos_rsrv = true,
+		align_rotation = true,
+		no_arrest = true,
+		interrupt_dmg = 0,
+		action_duration_min = 120,
+		action_duration_max = 180,
+		so_action = so_action,
+		search_position = search_position,
+		interrupt_dis = interrupt_dis or 7,
+		interval = -1,
+	}
+end
 -- Log tiers
 -- "log" is for general logging that is useful for players and developers
 -- "debug" is for general logging that only really developers/tinkerers need

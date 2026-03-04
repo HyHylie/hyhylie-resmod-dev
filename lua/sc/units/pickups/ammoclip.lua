@@ -49,6 +49,10 @@ function AmmoClip:_pickup(unit)
 					end
 				end
 			end
+			
+			if not picked_up and not player_manager:got_max_grenades() then
+				picked_up = true
+			end
 		end
 
 		if picked_up then
@@ -75,9 +79,10 @@ function AmmoClip:_pickup(unit)
 							local damage_ext = unit:character_damage()
 							if not damage_ext:need_revive() and not damage_ext:dead() and not damage_ext:is_berserker() then
 								damage_ext:restore_health(heal_amount * 0.1, true) --0.1 done to convert integer healing amount to values actually used by playerdamage.lua
-								damage_ext:restore_armor(player_manager:upgrade_value("player", "loose_ammo_give_armor", 0)) --Armor regen ability
+								damage_ext:restore_armor(damage_ext:_raw_max_armor() * player_manager:upgrade_value("player", "loose_ammo_give_armor", 0)) --Armor regen ability
 								damage_ext:fill_dodge_meter(player_manager:upgrade_value("player", "loose_ammo_give_dodge", 0) * damage_ext:get_dodge_points()) --Dodge regen ability
 								unit:sound():play("pickup_ammo_health_boost", nil, true)
+								managers.hud:start_buff("gambler", tweak_data.upgrades.loose_ammo_restore_health_values.cd[1])
 							end
 
 							--Apply team healing.
@@ -89,6 +94,7 @@ function AmmoClip:_pickup(unit)
 					elseif player_manager:has_activate_temporary_upgrade("temporary", "loose_ammo_restore_health") then --Cooldown reduction
 						local cooldown_reduction = -math.random(tweak_data.upgrades.loose_ammo_restore_health_values.cdr[1], tweak_data.upgrades.loose_ammo_restore_health_values.cdr[2]) --Gambler gotta gamble.
 						player_manager:extend_temporary_upgrade("temporary", "loose_ammo_restore_health", cooldown_reduction)
+						managers.hud:change_cooldown("gambler", cooldown_reduction)
 					end
 
 					if player_manager:has_category_upgrade("temporary", "loose_ammo_give_team") then
@@ -161,11 +167,15 @@ function AmmoClip:sync_net_event(event, peer)
 		end
 	end
 end
---[[
+
 Hooks:PostHook(AmmoClip, "reload_contour", "reload_contour_ammo_mutator_no_outlines", function(self)
-    local disable_outlines = managers.mutators:modify_value("AmmoClip:DisableOutlines", false)
-	if disable_outlines then
+    local disable_ammo_pickup_outlines = managers.mutators:modify_value("AmmoClip:DisableAmmoPickupOutlines", false)
+	if disable_ammo_pickup_outlines then
 		self._unit:contour():remove("deployable_selected")
 	end
+	--In case if deployables outlines are enabled due ammo boxes use the same contour color
+	local are_deployable_outlines_disabled = managers.mutators:modify_value("AmmoClip:DeployableOutlinesCheck", false)
+	if not disable_ammo_pickup_outlines and are_deployable_outlines_disabled and managers.user:get_setting("ammo_contour") then
+		self._unit:contour():_upd_opacity(1)
+	end
 end)
---]]

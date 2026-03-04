@@ -13,9 +13,26 @@ return {
 		},
 	},
 	-- FBI Ready Teams
-	[100107] = {
+	[100115] = {
 		on_executed = {
-			{id = 400055, delay = 15, delay_rand = 10,},
+			{ id = 400016, delay = 17, delay_rand = 3 }
+		},
+	},
+	-- Starting up these guys first
+	[100018] = {
+		on_executed = {
+			{ id = 400024, delay = 0, }, 
+		},
+	},
+	-- Garage ambush
+	[101629] = {
+		on_executed = {
+			{id =  400025, delay = 0, }, -- cloaker 
+			{id =  400027, delay = 0, }, -- dozer 
+			{id =  400029, delay = 0,}, -- gunner 1
+			{id =  400030, delay = 0,}, -- gunner 2
+			{ id = 400035, delay = 0, }, -- gunner 3
+			{id =  400033, delay = 0,}, -- taser 
 		},
 	},
 	[100109] = { -- Atrium, always active
@@ -29,6 +46,57 @@ return {
 				name = "archive_counter",
 				force = 2,
 				position = Vector3 (1300, 4300,-500),
+			},
+		},
+	},
+	[100732] = { -- Activate operations room reinforce when the players are doing objectives
+		reinforce = {
+			{
+				name = "operations_room",
+				force = 4,
+				position = Vector3(-200, 300, 0),
+			},
+		},
+	},
+	[100733] = {
+		reinforce = {
+			{ name = "operations_room" },
+		},
+	},
+	-- Add reinforce around the operations room
+	[101839] = { -- entrance_001
+		reinforce = {
+			{
+				name = "entrance01",
+				force = 2,
+				position = Vector3(-200, 2200, -100),
+			},
+		},
+	},
+	[101840] = { -- entrance_002
+		reinforce = {
+			{
+				name = "entrance02",
+				force = 2,
+				position = Vector3(975, 2200, -100),
+			},
+		},
+	},
+	[101841] = { -- entrance_003
+		reinforce = {
+			{
+				name = "entrance03",
+				force = 2,
+				position = Vector3(1800, 625, -100),
+			},
+		},
+	},
+	[101842] = { -- entrance_004
+		reinforce = {
+			{
+				name = "entrance04",
+				force = 2,
+				position = Vector3(1800, -600, -100),
 			},
 		},
 	},

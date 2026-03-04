@@ -113,7 +113,7 @@ function UnitNetworkHandler:sync_explosion_to_client(unit, position, normal, dam
 		return
 	end
 
-	managers.explosion:give_local_player_dmg(position, range, damage, nil, unit)
+	managers.explosion:give_local_player_dmg(position, range, damage, unit, curve_pow)
 	managers.explosion:explode_on_client(position, normal, unit, damage, range, curve_pow)
 end
 
@@ -318,3 +318,67 @@ function UnitNetworkHandler:sync_vehicle_interact_trunk(vehicle_unit, sender_rpc
 		driving_ext:_interact_trunk()
 	end
 end
+
+--- The sync_remove_carry equivalent for the carry stack.
+--- You're better off checking out the CarryStacker stuff in PlayerManager for more info.
+function UnitNetworkHandler:sync_remove_carry_stacker(sender)
+	local peer = self._verify_sender(sender)
+
+	if not self._verify_gamestate(self._gamestate_filter.any_ingame) or not peer then
+		return
+	end
+
+	managers.player:remove_synced_carry_stacker(peer)
+end
+
+function UnitNetworkHandler:sync_camera_rotation(cam_unit, end_yaw, duration)
+	if not alive(cam_unit) or not self._verify_gamestate(self._gamestate_filter.any_ingame) then
+		return
+	end
+
+	local target_yaw = (360 * (end_yaw / 255)) - 180
+
+	cam_unit:base():set_target_yaw(target_yaw, duration)
+end
+
+function UnitNetworkHandler:camera_set_attention(cam_unit, target_unit)
+	if not alive(cam_unit) or not self._verify_gamestate(self._gamestate_filter.any_ingame) then
+		return
+	end
+
+	if not alive(target_unit) then
+		cam_unit:base():set_target_attention(nil)
+		return
+	end
+
+	local handler = target_unit:attention()
+		or target_unit:brain() and target_unit:brain().attention_handler and target_unit:brain():attention_handler()
+		or target_unit:movement() and target_unit:movement().attention_handler and target_unit:movement():attention_handler()
+		or target_unit:base() and target_unit:base().attention_handler and target_unit:base():attention_handler()
+
+	cam_unit:base():set_target_attention({
+		unit = target_unit,
+		u_key = target_unit:key(),
+		handler = handler
+	})
+end
+
+function UnitNetworkHandler:camera_set_attention_pos(cam_unit, pos)
+	if not alive(cam_unit) or not self._verify_gamestate(self._gamestate_filter.any_ingame) then
+		return
+	end
+
+	cam_unit:base():set_target_attention({ pos = pos })
+end
+
+LuaNetworking:AddReceiveHook("sync_intimidated_guard_data", "SyncIntimidatedGuardDataHook", function(unit_id, time, sender)
+	if managers.enemy then
+		managers.enemy:decode_intimidated_guard_units(unit_id, time)
+	end
+end)
+
+LuaNetworking:AddReceiveHook("sync_intimidated_guard_data_delete", "SyncIntimidatedGuardDataDeleteHook", function(unit_id, sender)
+	if managers.enemy then
+		managers.enemy:unregister_intimidated_guard(unit_id)
+	end
+end)
