@@ -54,6 +54,7 @@ function FPCameraPlayerBase:_update_bwa(unit, t, dt)
 		
 		local p_rot = unit:rotation()
 
+		local in_crouch = p_mov._current_state._state_data.ducking
 		local in_sight = p_mov._current_state:in_steelsight()
 		local in_full_sight = p_mov._current_state:is_full_steelsight()
 		local in_dash = p_mov._current_state._last_dash_time and (p_mov._current_state._last_dash_time + 0.1) > (t)
@@ -63,6 +64,8 @@ function FPCameraPlayerBase:_update_bwa(unit, t, dt)
 		local input_axis = p_unit:base():controller():get_input_axis("move")
 		local in_walk = not in_air and (in_wallrun or in_slide or in_dash or mvector3.length(input_axis) ~= 0)
 		local in_run = in_walk and (in_dash or p_mov:running())
+		local in_bipod = p_state == "bipod"
+		local in_freefall = p_state == "jerry1" or p_state == "jerry2"
 		
 		local deltaT = math.clamp(dt, .0016, .05) --clamp dt so FPS spikes (or low fps) don't make the viewmodel fly off
 		local lp_speed = 16 * deltaT
@@ -89,6 +92,8 @@ function FPCameraPlayerBase:_update_bwa(unit, t, dt)
 
 		-----------------------------------------------------------------------------------------------------------------------------
 
+		--Old viewbob calcs
+		--[[
 		local mov_lp_speed = deltaT * 5.5
 		local run_mul = in_slide and 0 or in_run and 1.65 or 1
 		local mov_mul = (enable_bob_ads and in_sight and 0.15) or (enable_bob and not in_sight and 1.75) or 0
@@ -97,6 +102,26 @@ function FPCameraPlayerBase:_update_bwa(unit, t, dt)
 		mov_ang = mov_ang or Rotation()
 
 		mrotation.slerp(mov_ang, mov_ang, in_walk and Rotation(math.cos(getWaveValue(64 * run_mul, 1)) * mov_mul, math.sin(getWaveValue(128 * run_mul, 2)) * mov_mul, math.sin(getWaveValue(64 * run_mul, 1)) * mov_mul) or Rotation(), mov_lp_speed)
+		--]]
+
+		--New viewbob calcs that attempt to scale the viewbob rate with your actual speed
+		local mov_lp_speed = deltaT * 16--5.5
+		mov_pos = mov_pos or Vector3()
+		mov_ang = mov_ang or Rotation()
+
+		if not in_freefall then
+			local base_speed = tweak_data.player.movement_state.standard.movement.speed.STANDARD_MAX or 300
+			local current_speed = (p_mov._current_state._get_max_walk_speed and p_mov._current_state:_get_max_walk_speed(t)) or base_speed
+			local step_mod = ((in_sight or in_crouch) and 125) or (in_run and 175) or 150
+			local speed_mult = (current_speed / step_mod) * 0.44 --it just works lmao???
+			local run_mul = (in_slide and 0 or 1) * speed_mult --in_run and 1.45 or 1 --* ((in_sight and 0.8) or 1)
+			local mov_mul = (enable_bob_ads and in_sight and 0.15) or (enable_bob and not in_sight and 0.7) or 0
+
+			local rot_mul = mov_mul * 0.5
+			mrotation.slerp(mov_ang, mov_ang, not in_sight and in_walk and Rotation(math.cos(getWaveValue(64 * run_mul, 1.5)) * rot_mul, math.sin(getWaveValue(128 * run_mul, -2.5)) * rot_mul, math.sin(getWaveValue(64 * run_mul, 1)) * rot_mul) or Rotation(), mov_lp_speed)
+			mov_mul = mov_mul * ((in_sight and 0.5) or -0.5)
+			mvector3.lerp(mov_pos, mov_pos, in_walk and Vector3(-math.sin(getWaveValue(64 * run_mul, 1.5)) * mov_mul * ((in_run and 2) or 1), 0, -math.sin(getWaveValue(128 * run_mul, -2.5)) * mov_mul) or Vector3(), mov_lp_speed)
+		end
 
 		-----------------------------------------------------------------------------------------------------------------------------
 
@@ -120,12 +145,12 @@ function FPCameraPlayerBase:_update_bwa(unit, t, dt)
 		local is_akimbo = wep_base and wep_base.AKIMBO
 		local ignore_transition_styles = wep_base and wep_base:weapon_tweak_data().ign_ts
 
-		if res_ads_style ~= 1 and not is_akimbo and not ignore_transition_styles and p_state ~= "bipod" then
+		if not in_bipod and not is_akimbo and not ignore_transition_styles and res_ads_style ~= 1 then
 			ads_tilt_progress = ads_tilt_progress or 0
 			ads_tilt_target_ang = ads_tilt_target_ang or Rotation()
 			ads_tilt_target_pos = ads_tilt_target_pos or Vector3()
-			local ads_tilt_lp_speed = deltaT * 8 * ((in_full_sight and 1.5) or 1)
-			local steelsight_t = wep_base and (tweak_data.player.TRANSITION_DURATION / wep_base:enter_steelsight_speed_multiplier() / wep_base:second_sight_steelsight_mult()  ) or 0.2
+			local steelsight_t = wep_base and (tweak_data.player.TRANSITION_DURATION / wep_base:enter_steelsight_speed_multiplier()) or 0.2
+			local ads_tilt_lp_speed = (deltaT * 8 * ((in_full_sight and 1.5) or 1)) * wep_base:enter_steelsight_speed_multiplier()
 			if in_sight and not in_full_sight then
 			    ads_tilt_progress = math.min(ads_tilt_progress + dt, steelsight_t * 0.5)
 			elseif not in_sight then
@@ -136,7 +161,7 @@ function FPCameraPlayerBase:_update_bwa(unit, t, dt)
 			if ads_tilt_progress > 0 then
 			    tilt_pow = math.clamp(1 - (ads_tilt_progress / (steelsight_t * 0.5)), 0, 1)
 			end
-			if not in_sight then
+			if not in_sight or in_full_sight then
 				tilt_pow = 0
 			end
 			--tilt_pow = tilt_pow / pitch_mul

@@ -2,7 +2,7 @@ local mvec1 = Vector3()
 local is_pro = Global.game_settings and Global.game_settings.one_down
 PlayerDamage._UPPERS_COOLDOWN = tweak_data.upgrades.values.first_aid_kit.uppers_cooldown
 
-function PlayerDamage:init(unit)
+Hooks:OverrideFunction(PlayerDamage, "init", function (self, unit)
 	self._lives_init = tweak_data.player.damage.LIVES_INIT
 	--No longer check for one_down.
 	self._lives_init = managers.modifiers:modify_value("PlayerDamage:GetMaximumLives", self._lives_init)
@@ -239,7 +239,7 @@ function PlayerDamage:init(unit)
 	self._can_play_tinnitus_clbk_func = callback(self, self, "clbk_tinnitus_toggle_changed")
 
 	managers.user:add_setting_changed_callback("accessibility_sounds_tinnitus", self._can_play_tinnitus_clbk_func)	
-end
+end)
 
 --check_ally_attack == check if the attack came from an ally at all.
 function PlayerDamage:is_friendly_fire(unit, check_ally_attack, is_explosive)
@@ -654,6 +654,7 @@ function PlayerDamage:damage_bullet(attack_data)
 			self._unit:sound():play("Play_star_hit")
 			if attack_data.damage > 0 then
 				local unit_movement = self._unit:movement()
+				--[[
 				local drain_mult = 0
 				if unit_movement then
 					local current_state = unit_movement and unit_movement.current_state and unit_movement:current_state()
@@ -663,6 +664,7 @@ function PlayerDamage:damage_bullet(attack_data)
 					end
 				end
 				self._unit:movement():subtract_stamina(8 * drain_mult)
+				--]]
 				self:fill_dodge_meter(-1.0) --If attack is dodged, subtract '100' from the meter.
 				self:_send_damage_drama(attack_data, 0)
 				self._next_allowed_dmg_t = Application:digest_value(t + math.max(grace_bonus, self._dmg_interval), true)
@@ -937,7 +939,7 @@ function PlayerDamage:damage_melee(attack_data)
 	self._unit:movement():current_state()._d_scope_t = 0.6
 
 	local in_air = self._unit:movement():current_state():in_air()
-	local hit_in_air = self._unit:movement():current_state()._hit_in_air
+	local hit_in_air = self._unit:movement():current_state()._enemy_hit_in_air
 	
 	--Apply changes to actual melee push, this *can* be reduced to 0. Also don't allow players in bleedout to be pushed.
 	--Also don't allow for multiple pushes if in the air
@@ -946,7 +948,7 @@ function PlayerDamage:damage_melee(attack_data)
 		mvector3.multiply(attack_data.push_vel, push_multiplier)
 		self._unit:movement():current_state():push(attack_data.push_vel, true, 0.2, not force_crouch and true, force_crouch)
 		if in_air then
-			self._unit:movement():current_state()._hit_in_air = true
+			self._unit:movement():current_state()._enemy_hit_in_air = true
 		end
 	end
 	
@@ -1109,6 +1111,10 @@ function PlayerDamage:damage_killzone(attack_data)
 	end
 
 	self:_call_listeners(damage_info)
+end
+
+function PlayerDamage:stun_hit(attack_data)
+	return nil --self:damage_tase(attack_data)
 end
 
 --Refactored from vanilla. Applies damage linearly on a % basis starting with damage then health. 
@@ -1696,12 +1702,18 @@ end
 Hooks:PostHook(PlayerDamage, "update" , "ResDamageInfoUpdate" , function(self, unit, t, dt)
 	local pm = managers.player
 	self._in_smoke_bomb = 0.0
+	self._selected_smoke_screen = nil
+
 	for _, smoke_screen in ipairs(pm._smoke_screen_effects or {}) do
 		if smoke_screen:is_in_smoke(self._unit) then
 			if smoke_screen:mine() then
 				self._in_smoke_bomb = 2.0
-			else
+				self._selected_smoke_screen = smoke_screen
+			elseif self._in_smoke_bomb < 1.0 then
+				-- To cover the case where there are two Sicarios. Whoever threw their smoke bomb second would
+				-- "overwrite" the other Sicario's full benefit.
 				self._in_smoke_bomb = 1.0
+				self._selected_smoke_screen = smoke_screen
 			end
 		end
 	end
@@ -1734,6 +1746,8 @@ Hooks:PostHook(PlayerDamage, "update" , "ResDamageInfoUpdate" , function(self, u
 	--Sicario capstone skill.
 	if self._in_smoke_bomb == 2.0 then
 		passive_dodge = passive_dodge + pm:upgrade_value("player", "sicario_multiplier", 0)
+	elseif self._in_smoke_bomb == 1.0 and self._selected_smoke_screen then
+		passive_dodge = passive_dodge + self._selected_smoke_screen:dodge_bonus()
 	end
 
 	if alive(self._unit) and self._unit.movement and self._unit:movement() then

@@ -402,3 +402,42 @@ if StalkerGaussWeaponBase then
 		return ray_res
 	end
 end
+
+if TF2SniperWeaponBase then
+	function TF2SniperWeaponBase:get_sniper_charge_state()
+		local can_headshot = false
+		local dmg_mul = 1
+		
+		if self._sniper_charge_t then
+			local t = self._unit:timer():time()
+			local elapsed = t + -self._sniper_charge_t + -self._SNIPER_CHARGE_MIN
+			
+			if elapsed > 0 then
+				can_headshot = true
+				
+				local lerp = math.clamp(elapsed / (self._SNIPER_CHARGE_MAX - self._SNIPER_CHARGE_MIN),0,1) --fix missing cap on charge
+				
+				dmg_mul = dmg_mul + lerp * self._SNIPER_CHARGE_DAMAGE_MUL
+			end
+		end
+		
+		return can_headshot,dmg_mul
+	end
+
+	function TF2SniperWeaponBase:fire(...)
+		self._bullets_fired = 0 -- prevent normal fire sound
+		
+		local ray_res = TF2SniperWeaponBase.super.fire(self, ...)
+
+		-- reset charge after firing
+		self._sniper_charge_t = nil
+		
+		if self._fire_mode == ids_burst and self._bullets_fired > 1 and not self:weapon_tweak_data().sounds.fire_single then
+			self:_fire_sound()
+		end
+
+		--cut the bit that's responsible for the descope on fire as res handles it elsewhere
+
+		return ray_res
+	end
+end

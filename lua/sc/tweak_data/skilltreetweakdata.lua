@@ -651,6 +651,7 @@ function SkillTreeTweakData:init(tweak_data)
 					[2] = {
 						upgrades = {
 							"carry_movement_penalty_nullifier",
+							"player_armor_carry_stamina_drain_reduction",
 							"carry_increased_carry_weight"
 						},
 						cost = self.costs.pro
@@ -2062,6 +2063,7 @@ function SkillTreeTweakData:init(tweak_data)
 			{
 				upgrades = {
 					"team_passive_stamina_multiplier_1",
+					"team_passive_stamina_multiplier_2",
 					"player_passive_intimidate_range_mul",
 					"player_passive_dodge_chance_1"
 				},
@@ -3708,6 +3710,7 @@ function SkillTreeTweakData:init(tweak_data)
 			{
 				upgrades = {
 					"player_sicario_multiplier",
+					"player_smoke_screen_ally_dodge_bonus",
 					"player_passive_loot_drop_multiplier_1"
 				},
 				cost = 4000,

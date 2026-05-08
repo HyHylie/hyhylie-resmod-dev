@@ -304,6 +304,17 @@ function RaycastWeaponBase:categories()
 	return self:weapon_tweak_data().categories or {}
 end
 
+function RaycastWeaponBase:clip_empty()
+	local clip_empty = self:ammo_base():get_ammo_remaining_in_clip() == 0
+	if self._starwars and not self._starwars.can_reload then
+		local user_unit = self._setup and self._setup.user_unit
+		local current_state = alive(user_unit) and user_unit:movement() and user_unit:movement()._current_state
+		if current_state and current_state._is_overheating and current_state:_is_overheating() then
+			clip_empty = nil
+		end
+	end
+	return clip_empty
+end
 
 --Refactored from vanilla code for consistency and simplicity.
 function RaycastWeaponBase:add_ammo(ratio, add_amount_override)
@@ -360,7 +371,6 @@ function RaycastWeaponBase:add_ammo(ratio, add_amount_override)
 	end
 
 	return picked_up, add_amount
-
 end
 
 function RaycastWeaponBase:_fire_raycast(user_unit, from_pos, direction, dmg_mul, shoot_player, spread_mul, autohit_mul, suppr_mul, ignore_hit_stats)
@@ -1305,23 +1315,30 @@ function InstantBulletBase:on_collision(col_ray, weapon_unit, user_unit, damage,
 		do_push = true
 	end
 
-	if do_push then
-		managers.game_play_central:physics_push(col_ray, push_mul)
-	end
-
-	if headshot then
+	if headshot and math.rand(1) >= 0.5 then
 		local mov_ext = col_ray.unit and col_ray.unit.movement and col_ray.unit:movement()
 		local full_body_action = mov_ext and mov_ext:get_action(1)
-		DelayedCalls:Add("tbox_shot", 0.09, function ()
+		local delay = math.rand(0.03, 0.09)
+		DelayedCalls:Add("tbox_shot", delay, function()
 			local hurt_ext = full_body_action and full_body_action.force_ragdoll and full_body_action:force_ragdoll(true)
-			managers.game_play_central:physics_push(col_ray, push_mul)
+			if col_ray then
+				managers.game_play_central:physics_push(col_ray, 1.75)
+			end
 		end)
 	end
 
-	if do_shotgun_push then
+	if do_push then
+		if weap_base._rays and weap_base._rays > 1 then
+			local force = math.clamp(weap_base._rays / 4, 4, 12)
+			push_mul = 2.5 / force
+		end
+		managers.game_play_central:physics_push(col_ray, push_mul)
+	end
+
+	if do_shotgun_push and weap_base._rays and weap_base._rays > 1 then
 		local dir = col_ray.ray
-		mvector3.multiply(dir, 0.75)
-		--managers.game_play_central:do_shotgun_push(col_ray.unit, col_ray.position, dir, col_ray.distance, user_unit)
+		mvector3.multiply(dir, 1)
+		managers.game_play_central:do_shotgun_push(col_ray.unit, col_ray.position, dir, col_ray.distance, user_unit)
 	end
 
 	--[[
@@ -1544,7 +1561,7 @@ function FlameBulletBase:on_collision(col_ray, weapon_unit, user_unit, damage, b
 	end
 
 	if do_shotgun_push then
-		-- managers.game_play_central:do_shotgun_push(col_ray.unit, col_ray.position, col_ray.ray, col_ray.distance, user_unit)
+		--managers.game_play_central:do_shotgun_push(col_ray.unit, col_ray.position, col_ray.ray, col_ray.distance, user_unit)
 	end
 
 	--Play Impact flesh is never true on fire bullets. No need for this conditional.
@@ -1831,7 +1848,7 @@ function InstantExplosiveBulletBase:on_collision_server(position, normal, damage
 	local slot_mask = managers.slot:get_mask("explosion_targets")
 
 	managers.explosion:play_sound_and_effects(position, normal, self.RANGE, self.EFFECT_PARAMS)
-	managers.explosion:give_local_player_dmg(position, self.RANGE, damage * self.PLAYER_DMG_MUL, user_unit) --Passes in the unit that actually made the attack.
+	managers.explosion:give_local_player_dmg(position, self.RANGE + 150, damage * self.PLAYER_DMG_MUL, user_unit, nil, true) --Passes in the unit that actually made the attack.
 
 	local hit_units, splinters, results = managers.explosion:detect_and_give_dmg({
 		hit_pos = position,
@@ -1895,7 +1912,7 @@ function InstantExplosiveBulletBase:on_collision_server(position, normal, damage
 end
 
 function InstantExplosiveBulletBase:on_collision_client(position, normal, damage, user_unit)
-	managers.explosion:give_local_player_dmg(position, self.RANGE, damage * self.PLAYER_DMG_MUL, user_unit) --Passes in the unit that actually made the attack.
+	managers.explosion:give_local_player_dmg(position, self.RANGE + 150, damage * self.PLAYER_DMG_MUL, user_unit, nil, true) --Passes in the unit that actually made the attack.
 	managers.explosion:explode_on_client(position, normal, user_unit, damage, self.RANGE, self.CURVE_POW, self.EFFECT_PARAMS)
 end
 
@@ -1989,6 +2006,116 @@ function InstantSnowballBase:on_collision(col_ray, weapon_unit, user_unit, damag
 	end
 
 	return nil
+end
+
+function ReviveInstantBulletBase:on_collision(col_ray, weapon_unit, user_unit, damage, blank, no_sound)
+	local hit_unit = col_ray.unit
+	user_unit = alive(user_unit) and user_unit or nil
+
+	weapon_unit = alive(weapon_unit) and weapon_unit or nil
+	local dmg_ext = hit_unit:character_damage()
+
+	if not dmg_ext then
+		local slotmask = managers.slot:get_mask("criminals_no_deployables")
+		local criminals = World:find_units("sphere", col_ray.position, self.GENEROCITY_RADIUS, slotmask)
+
+		for _, criminal_unit in ipairs(criminals) do
+			local needs_revive = false
+
+			if criminal_unit:base() and criminal_unit:base().is_husk_player then
+				needs_revive = criminal_unit:interaction():active() and criminal_unit:movement():need_revive() and criminal_unit:movement():current_state_name() ~= "arrested"
+			elseif criminal_unit:character_damage() and criminal_unit:character_damage().need_revive then
+				needs_revive = criminal_unit:character_damage():need_revive()
+			end
+
+			if needs_revive then
+				mvector3.set(tmp_vec1, criminal_unit:position())
+				mvector3.subtract(tmp_vec1, col_ray.position)
+				mvector3.normalize(tmp_vec1)
+
+				local criminal_fwd = -criminal_unit:rotation():y()
+				local dot = mvector3.dot(criminal_fwd, tmp_vec1)
+
+				if self.GENEROCITY_DOT <= dot then
+					hit_unit = criminal_unit
+					dmg_ext = hit_unit:character_damage()
+					col_ray.position = criminal_unit:position()
+					col_ray.unit = criminal_unit
+					col_ray.body = nil
+
+					break
+				end
+			end
+		end
+	end
+
+	local play_impact_flesh = not dmg_ext or not dmg_ext._no_blood
+
+	if play_impact_flesh then
+		self:play_impact_sound_and_effects(weapon_unit, col_ray, no_sound)
+	end
+
+	if not blank and weapon_unit and dmg_ext then
+		ReviveInstantBulletBase:give_revive_damage(hit_unit, user_unit)
+
+		return {
+			variant = "revive",
+			col_ray = col_ray
+		}
+	end
+
+	return nil
+end
+
+function ReviveInstantBulletBase:give_revive_damage(hit_unit, user_unit)
+	if not hit_unit then
+		return
+	end
+
+	local base_ext = hit_unit:base()
+	local dmg_ext = hit_unit:character_damage()
+
+	if not base_ext or not dmg_ext then
+		return
+	end
+
+	if dmg_ext:dead() then
+		return
+	end
+
+	local needs_revive = nil
+
+	if base_ext.is_husk_player then
+		needs_revive = hit_unit:interaction():active() and hit_unit:movement():need_revive() and hit_unit:movement():current_state_name() ~= "arrested"
+	elseif dmg_ext.need_revive then
+		needs_revive = dmg_ext:need_revive()
+	end
+
+	if needs_revive then
+		hit_unit:interaction():interact(user_unit)
+
+		return
+	end
+
+	if not hit_unit:movement().cool or hit_unit:movement():cool() then
+		return
+	end
+
+	local my_team = hit_unit:movement():team()
+
+	if my_team.friends.criminal1 then
+		--return
+	end
+
+	local char_tweak = base_ext and base_ext.char_tweak and base_ext:char_tweak()
+
+	if not char_tweak or char_tweak.can_be_healed == false then
+		return false
+	end
+
+	if dmg_ext and dmg_ext.do_medic_heal_and_action then
+		dmg_ext:do_medic_heal_and_action(true)
+	end
 end
 
 function RaycastWeaponBase:get_hipfire_stance_id()

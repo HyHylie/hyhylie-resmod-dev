@@ -136,7 +136,7 @@ function NewNPCRaycastWeaponBase:_fire_raycast(user_unit, from_pos, direction, d
 
 				if hit_char.type and hit_char.type == "death" then
 					if self:is_category("shotgun") then
-						--managers.game_play_central:do_shotgun_push(hit.unit, hit.position, hit.ray, hit.distance, user_unit)
+						managers.game_play_central:do_shotgun_push(hit.unit, hit.position, hit.ray, hit.distance, user_unit)
 					end
 
 					if user_unit:unit_data().mission_element then
@@ -228,6 +228,25 @@ function NewNPCRaycastWeaponBase:_sound_autofire_end()
 		sound_name = prefix .. "1" .. self._voice .. "_end"
 		sound = self._sound_fire:post_event(sound_name)
 	end
+end
+
+function NewNPCRaycastWeaponBase:singleshot(...)
+	local fired = nil
+
+	if self._next_fire_allowed <= Application:time() then
+		fired = self:fire(...)
+	end
+
+	if fired then
+		local weapon_fire_mode = tweak_data.weapon[self._name_id].single or tweak_data.weapon[self._name_id].auto or tweak_data.weapon[self._name_id].fire_rate
+		local weapon_fire_rate = (weapon_fire_mode and weapon_fire_mode.fire_rate) or 0.1
+		--log(tostring( self._name_id ))
+		--log(tostring( weapon_fire_mode and weapon_fire_mode.fire_rate ))
+		self._next_fire_allowed = Application:time() + ((weapon_fire_mode and weapon_fire_mode.fire_rate) or 0.01)
+		self:_sound_singleshot()
+	end
+
+	return fired
 end
 
 function NewNPCRaycastWeaponBase:_sound_singleshot()

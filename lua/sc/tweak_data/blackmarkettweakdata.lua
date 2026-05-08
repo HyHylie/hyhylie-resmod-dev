@@ -1889,6 +1889,10 @@ function BlackMarketTweakData:_init_projectiles(tweak_data)
 		"launcher_incendiary_ms3gl",
 		"launcher_electric_ms3gl",
 		"sticky_grenade",
+		"dart_poison",
+		"dart_daze",
+		"dart_revive",
+		"laser_watch",
 		--Resmod projectiles
 		"bravo_frag",
 		"cluster_fuck",
@@ -1964,6 +1968,10 @@ function BlackMarketTweakData:_init_projectiles(tweak_data)
 	self.projectiles.sticky_grenade.throw_shout = nil
 	self.projectiles.sticky_grenade.max_amount = 3
 	self.projectiles.sticky_grenade.base_pickup_chance = {0.0125, 0.025}
+
+	self.projectiles.laser_watch.base_cooldown_no_perk = true
+	self.projectiles.laser_watch.base_cooldown = 45
+	self.projectiles.laser_watch.pickup_cooldown_t = 4.5 --10~ pickups to gain back one immediately
 
 	if self.projectiles.xmas_snowball then
 		self.projectiles.xmas_snowball.throw_allowed_expire_t = 0.1
@@ -5195,7 +5203,7 @@ function BlackMarketTweakData:_init_melee_weapons(tweak_data)
 		self.melee_weapons.model24.special_weapon = "caber"
 		self.melee_weapons.model24.stats.cleave = 1
 		self.melee_weapons.model24.stats.raycasts = 15
-		self.melee_weapons.model24.explosion_chance = 0.5
+		self.melee_weapons.model24.explosion_chance = 1
 		self.melee_weapons.model24.explosion_curve_pow = 0
 		self.melee_weapons.model24.explosion_damage = 72
 		self.melee_weapons.model24.explosion_player_damage = 36
@@ -6756,6 +6764,65 @@ Hooks:PostHook(BlackMarketTweakData, "init", "CustomMelee", function(self, tweak
 			self.melee_weapons[melee_id].melee_damage_delay = 0.15
 			self.melee_weapons[melee_id].anim_speed_mult = 0.7
 		end
+	end
+
+	--melee_sakura_dork
+	melee_anim = {
+		'sakura_dork'
+	}
+	for i, melee_id in ipairs(melee_anim) do
+		if self.melee_weapons[melee_id] then
+			self.melee_weapons[melee_id].attack_pattern = "bm_melee_pattern_blunt"
+			self.melee_weapons[melee_id].anim_global_param = "melee_sakura_dork"
+			self.melee_weapons[melee_id].align_objects = {"a_weapon_right"}
+			self.melee_weapons[melee_id].anim_attack_vars = {"var1","var3"}
+			self.melee_weapons[melee_id].anim_attack_charged_vars = {"var2"}
+			self.melee_weapons[melee_id].anim_attack_var_dir = {
+				var1 = {"left", 0.7},
+				var2 = {"left", 0.1},
+				var3 = {"left", 0.5},
+			}
+			self.melee_weapons[melee_id].expire_t = 0.625
+			self.melee_weapons[melee_id].repeat_expire_t = 0.575
+			self.melee_weapons[melee_id].melee_damage_delay = 0.125
+			self.melee_weapons[melee_id].anim_speed_mult = 0.74
+			--self.melee_weapons[melee_id].sphere_cast_radius_add = 4
+			self.melee_weapons[melee_id].force_play_charge = nil
+			self.melee_weapons[melee_id].anims = {
+				var1_attack = {
+					anim = "var2"
+				},		
+				var2_attack = {
+					anim = "var2"
+				},		
+				var3_attack = {
+					anim = "var2"
+				},
+				var4_attack = {
+					anim = "var2"
+				},
+				charge = {
+					anim = "charge"
+				}
+			}
+		end
+	end
+
+	if self.melee_weapons.sakura_dork then
+		self.melee_weapons.sakura_dork.attack_pattern = nil
+		self.melee_weapons.sakura_dork.stats.cleave = 1
+		self.melee_weapons.sakura_dork.stats.raycasts = 1
+		self.melee_weapons.sakura_dork.stats.raycasts_charge = 1
+		self.melee_weapons.sakura_dork.stats.min_damage = 1
+		self.melee_weapons.sakura_dork.stats.max_damage = 2.001
+		self.melee_weapons.sakura_dork.stats.min_damage_effect = 1.0
+		self.melee_weapons.sakura_dork.stats.max_damage_effect = 2.0
+		self.melee_weapons.sakura_dork.stats.charge_time = 10
+		self.melee_weapons.sakura_dork.stats.range = 100
+		self.melee_weapons.sakura_dork.stats.concealment = 20
+		self.melee_weapons.sakura_dork.stats.speed_mult = 1
+		self.melee_weapons.sakura_dork.disallow_sprint = true
+		self.melee_weapons.sakura_dork.ignore_charge_speed = true
 	end
 
 	if self.melee_weapons.megumins_staff then --Hoppip's Megumin Staff

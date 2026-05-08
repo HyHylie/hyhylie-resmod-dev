@@ -1631,7 +1631,7 @@ Hooks:Add("LocalizationManagerPostInit", "SC_Localization_Eng", function(loc)
 		["bm_pdw_gen_sc_desc"] = "#{skill_color}#Deals 75% of its damage through body armor.##",
 		["bm_heavy_ap_weapon_sc_desc"] = "#{skill_color}#Can pierce multiple enemies, their body armor, shields, titan-shields and thin walls.##",
 		["bm_heavy_ap_no_mult_weapon_sc_desc"] = "#{skill_color}#Can pierce multiple enemies, their body armor, shields, titan-shields and thin walls.##",
-		["bm_integral_suppressor_desc"] = "Comes #{skill_color}#integrally suppressed##.",
+		["bm_integral_suppressor_desc"] = "Comes #{skill_color}#integrally suppressed.##",
 
 		["bm_bow_sc_desc"] = "Hold #{skill_color}#$BTN_FIRE## to draw an arrow, release to fire.\nDamage and velocity of the arrow increases as you approach full draw.\n\nPress #{skill_color}#$BTN_AIM## to let down your drawn arrow.\n\nArrows can be retrieved by picking them up.\n#{skill_color}#Can pierce body armor.##",
 		["bm_bow_exp_sc_desc"] = "Hold #{skill_color}#$BTN_FIRE## to draw an arrow, release to fire.\nVelocity of the arrow increases as you approach full draw.\n\nPress #{skill_color}#$BTN_AIM## to let down your drawn arrow.\n\n#{risk}#Arrows explode on impact;## #{risk}#damage is split between the arrow and explosion.##",
@@ -1799,7 +1799,7 @@ Hooks:Add("LocalizationManagerPostInit", "SC_Localization_Eng", function(loc)
 		--FREEDOM ISN'T FREE
 		["bm_melee_freedom_info"] = "Thirteen stripes of red alternating with white, a blue rectangle in the canton, fifty small, white, five-pointed stars, a pinch of patriotism, two cups of freedom and a broken flag pole.\n\nVoilà - you have yourself a deadly weapon.",
 		--Who needs pants?
-		["bm_melee_erica_info"] = "A sane person would throw this.\n\nFully charged hits against living enemies have a #{skill_color}#100%## chance to explode dealing #{risk}#720## damage in a #{skill_color}#5## meter radius from the point of impact.",
+		["bm_melee_erica_info"] = "A sane person would throw this.\n\nFully charged hits against living enemies have a #{skill_color}#100%## chance to explode dealing #{risk}#720## damage in a #{skill_color}#5## meter radius from the point of impact.\n\n#{important_1}#The explosion deals self-damage.##",
 			["bm_melee_cqc20_info"] = "#{risk}#GET SOME!##\n\nFully charged hits against living enemies have a #{skill_color}#100%## chance to set off a controlled explosion dealing #{risk}#720## damage to enemies in a #{skill_color}#2## meter radius from the point of impact.\n\n#{important_1}#Charge speed is unaffected by skills.##",
 
 		--Hammer
@@ -2005,7 +2005,9 @@ Hooks:Add("LocalizationManagerPostInit", "SC_Localization_Eng", function(loc)
 		["bm_melee_revenant_heirloom"] = "Dead Man's Curve",
 		["bm_melee_revenant_heirloom_info"] = "#{important_1}#\"You don't want to see this up close, skin bag.\"##",
 		--best girl
-		["bm_melee_megumins_staff_info"] = "Cast a powerful explosion when fully charged!\nCan be cast as far as #{skill_color}#30## meters on any surface or being; #{risk}#it cannot be cast into the air.##\n\n#{important_1}#Charge speed is unaffected by skills.\nCharging distorts vision, drains stamina and progressively slows down your movement.\nYou are instantly downed upon successfully casting an explosion; skills and perks that delay or save you from going down are ignored.##",
+		["bm_melee_megumins_staff_info"] = "Cast a powerful explosion when fully charged!\nCan be cast as far as #{skill_color}#30## meters on any surface or being; #{risk}#it cannot be cast into the air.##\n\n#{important_1}#Charge speed is unaffected by skills.\nCharging blocks your ability to sprint, distorts vision, drains stamina and progressively slows down your movement.\nYou are instantly downed upon successfully casting an explosion; skills and perks that delay or save you from going down are ignored.##",
+		--ISEKAI
+		["bm_melee_sakura_dork_info"] = "Same day dork delivery, guaranteed!\n\nFully charge then swing to summon Truck-san.\n\n#{important_1}#Charge speed is unaffected by skills.\nYou cannot sprint while charging or attacking with this weapon.##",
 		--fishe
 		["bm_melee_holy_mackerel_info"] = "#{item_stage_2}#Level 42 Fish##\n\nGetting hit by a fish has got to be humiliating.",
 
@@ -2211,6 +2213,7 @@ Hooks:Add("LocalizationManagerPostInit", "SC_Localization_Eng", function(loc)
 		["bm_menu_btn_sell"] = "SELL WEAPON ($price)",
 		["bm_menu_btn_buy_selected_weapon"] = "BUY WEAPON ($price)",
 
+		["menu_persecond_suffix_short"] = "/s",
 		["menu_milliseconds_suffix_short"] = "ms", --milliseconds
 		["menu_meters_suffix_short"] = "m", --meters
 
@@ -2230,6 +2233,21 @@ Hooks:Add("LocalizationManagerPostInit", "SC_Localization_Eng", function(loc)
 		["bm_menu_damage_min"] = "Damage Min",
 		["bm_menu_moving_range"] = "Falloff End",
 
+		--Throwables
+		["bm_menu_damage_blast"] = "Damage (Blast)",
+		["bm_menu_range_blast"] = "Range (Blast)",
+		["bm_menu_time_blast"] = "Duration (Blast)",
+		["bm_menu_damage_impact"] = "Damage (Impact)",
+		["bm_menu_range_impact"] = "Range (Impact)",
+		["bm_menu_damage_pool"] = "Damage (Pool)",
+		["bm_menu_range_pool"] = "Range (Pool)",
+		["bm_menu_time_pool"] = "Duration (Pool)",
+		["bm_menu_damage_dot"] = "Damage (DOT)",
+		["bm_menu_range_dot"] = "Range (DOT)",
+		["bm_menu_time_dot"] = "Duration (DOT)",
+		["bm_menu_cooldown_reduction"] = "Pickup Reduction",
+
+		--Melee
 		["bm_menu_attack_speed"] = "Repeat Delay",
 		["bm_menu_impact_delay"] = "Impact Delay",
 		["bm_menu_cleave"] = "Cleave",
@@ -2716,6 +2734,7 @@ Hooks:Add("LocalizationManagerPostInit", "SC_Localization_Weapons_Eng", function
 					["bm_wp_raygun_o_waw_desc"] = "Changes the iron sight alignment to how it was before Call of Duty: Black Ops II",
 
 			--[[ PISTOLS ]]
+				["bm_welrod_sc_desc"] = "Compact and disguised to look like a bike pump, this covert weapon can silently take out isolated targets. Comes #{skill_color}#integrally suppressed.##",
 				--Gecko Pistol
 				["bm_tranq_maxim_sc_desc"] = "The world's first commercially available #{skill_color}#integrally suppressed## semi-auto pistol, good handling and concealability tie in well with debilitating tranquilizer rounds.\n\n#{stats_positive}#Deals 30 damage/sec for 2 seconds with tranquilizer rounds.##",
 				["bm_tranq_maxim_auto_sc_desc"] = "A pair of the world's first commercially available #{skill_color}#integrally suppressed## semi-auto pistols, good handling and concealability tie in well with debilitating tranquilizer rounds.\n\n#{stats_positive}#Deals 30 damage/sec for 2 seconds with tranquilizer rounds.##\n#{risk}#Duration diminishes over range.##",
@@ -2736,6 +2755,9 @@ Hooks:Add("LocalizationManagerPostInit", "SC_Localization_Weapons_Eng", function
 				--PPK (Gruber)
 				["bm_ppk_sc_desc"] = "A compact alternative to larger, more dangerous firearms. A classic weapon with classic application.",
 				["bm_x_ppk_sc_desc"] = "For when you need to be less 007 and more Kingsman.",
+				--Makarov (Strix)
+				["bm_pmm_sc_desc"] = "This Soviet-era pistol continues to see combat around the world to this day. Its small size makes it easily concealable, but it still packs a punch when things get loud.",
+				["bm_x_pmm_sc_desc"] = "",
 				--M13
 				["bm_legacy_sc_desc"] = "West German design that was ultimately rejected in favor of the Bernetti, but will still hold its own in a fire fight.",
 				["bm_x_legacy_sc_desc"] = "Two pistols forgotten by history that will leave a legacy of lead in a room of your choosing.",
@@ -2774,6 +2796,8 @@ Hooks:Add("LocalizationManagerPostInit", "SC_Localization_Weapons_Eng", function
 				--Baby Deagle--
 				["bm_sparrow_sc_desc"] = "SEE YOU SPACE COWBOY...",
 				["bm_w_sparrow_sc_g_cowboy_desc"] = "YOU'RE GONNA CARRY THAT WEIGHT.",
+				--Ballerina 9mm (Pivot PCC)
+				["bm_speen_sc_desc"] = "A favorite amongst undercover operatives, this pistol-caliber carbine folds neatly away when not in use, making it easier to conceal.",
 				--socom deez nuts--
 				["bm_w_socom_desc"] = "Jackal's sidearm of choice. A reliable and powerful .45 ACP handgun with a stylish design.",
 				["bm_wp_wpn_fps_upg_fl_pis_socomlam"] = "Ra Combined Module",
@@ -2821,7 +2845,6 @@ Hooks:Add("LocalizationManagerPostInit", "SC_Localization_Weapons_Eng", function
 				["bm_rsh12_sc_iw_desc"] = "3-round burst ballistic pistol. Has a triple chamber stack for rapid three round bursts.\n\n#{skill_color}#Can pierce body armor, multiple enemies and thin walls.##",
 				--SAA/Peacemaker
 				["bm_ap_weapon_peacemaker_sc_desc"] = "#{risk}#The greatest handgun ever made.##\n\nLoaded with specialized .45 rounds that #{skill_color}#can pierce body armor, multiple enemies, shields and thin walls.##\n\nCan be #{skill_color}#fanned for an increased fire rate## at the cost of #{important_1}#more recoil, reduced effective range and the inabilty to aim down your sights.##",
-				--SAA/Peacemaker
 				["bm_wp_peacemaker_rifle_stock_desc"] = "Allows for aiming while fanning the hammer.",
 				--CUSTOM PISTOLS
 					--Px4 Storm
@@ -3120,6 +3143,9 @@ Hooks:Add("LocalizationManagerPostInit", "SC_Localization_Weapons_Eng", function
 					["bm_mod3_sc_desc"] = "Special modification of the Valkyria with improved ergonomics and shortened dimensions, seeing notable use in armed conflicts between PMCs in areas near the Russian coast of the Gulf of Finland.\n\nComes #{skill_color}#integrally suppressed## and #{skill_color}#deals 25% of its damage through body armor.##",
 					-- Malyuk
 					["bm_wp_wpn_fps_ass_malima_xmag"] = "45 Round Mag",
+					-- MW2 (2009 M4)
+					["bm_wp_wpn_fps_ass_noobtube_so_mw2"] = "MW2 (2009) Bolt",
+					["bm_wp_wpn_fps_ass_noobtube_so_mw3"] = "MW3 (2011) Bolt",
 
 			--[[ DMRs ]]
 				--Little Friend
@@ -3278,8 +3304,12 @@ Hooks:Add("LocalizationManagerPostInit", "SC_Localization_Weapons_Eng", function
 					["bm_dl_cyanide_desc"] = "#{stats_positive}#Fires cyanide-laced rounds that deal heavy damage after a few seconds## and #{skill_color}#can pierce body armor, shields and thin walls.##",
 					--SVT-40
 					["bm_wp_upg_i_avt40_desc"] = "Modified internals capable of #{risk}#fully automatic fire##.\nAnd you thought the M308 was hard to control.",
+					--Stalker Gauss Rifle
+					["bm_w_gauss_gun_desc"] = "Developed in the Zone and incorporating an electromagnetic bullet acceleration system, this sniper rifle is used exclusively within the Zone.\n\n#{skill_color}#Can pierce multiple enemies, their body armor, shields, titan-shields and thin walls.##",
 
 			--[[ SPECIALS ]]
+				--Dart Gun
+				["bm_dart_sc_desc"] = "A quiet and adaptable weapon that can launch highly damaging darts at unsuspecting targets.\n\nComes equipped with powerful #{stats_positive}#Poison Darts## that can be exchanged for #{ghost_color}#Sedation Darts## or #{stat_maxed}#Revival-Stimulant Darts## to adjust to any challenge.\n ",
 				--Saw
 				["bm_ap_saw_sc_desc"] = "#{skill_color}#Cuts through body armor.##",
 				["bm_ap_saw_blade_sc_desc"] = "Sharpens the blade enough to #{skill_color}#cut through body armor.##",
@@ -3348,6 +3378,9 @@ Hooks:Add("LocalizationManagerPostInit", "SC_Localization_Weapons_Eng", function
 					--PPK (Gruber)
 					["bm_w_ppk"] = "Gruber Kurz",
 					["bm_w_x_ppk"] = "Akimbo Gruber Kurzes",
+					--Strix (Makarov)
+					["bm_w_pmm"] = "Strix",
+					["bm_w_x_pmm"] = "Akimbo Strixes",
 					--M13
 					["bm_w_legacy"] = "M13",
 					["bm_w_x_legacy"] = "Akimbo M13s",
@@ -3386,6 +3419,8 @@ Hooks:Add("LocalizationManagerPostInit", "SC_Localization_Weapons_Eng", function
 					--Baby Deagle--
 					["bm_w_sparrow"] = "Sparrow 941",
 					["bm_w_x_sparrow"] = "Spike & Vicious",
+					--Ballerina
+					["bm_w_speen"] = "Ballerina 9mm",
 					--Crosskill
 					["bm_w_colt_1911"] = "Crosskill Operator II",
 					["bm_w_x_1911"] = "Mustang & Sally",
@@ -3910,8 +3945,12 @@ Hooks:Add("LocalizationManagerPostInit", "SC_Localization_Weapons_Eng", function
 					["bm_w_x_stech"] = "Akimbo Stechkins",
 					--Gruber
 					["bm_w_ppk"] = "Walther PPK/S",
+					["bm_w_x_ppk"] = "Akimbo PPKs",
 					["bm_wp_pis_ppk_g_laser"] = "Crimson Trace Laser Grip",
 					["bm_wp_pis_ppk_b_long"] = "PPKS Slide",
+					--Strix (Makarov)
+					["bm_w_pmm"] = "Makarov PM",
+					["bm_w_x_pmm"] = "Akimbo Makarovs",
 					--Chimano 88
 					["bm_w_glock_17"] = "Glock 17",
 					["bm_w_x_g17"] = "Akimbo Glock 17s",
@@ -3970,6 +4009,8 @@ Hooks:Add("LocalizationManagerPostInit", "SC_Localization_Weapons_Eng", function
 					["bm_wp_sparrow_body_941"] = "IWI Jericho 941F Kit",
 					["bm_wp_sparrow_g_cowboy"] = "Weighted Grip",
 					["bm_wp_sparrow_g_cowboy_desc"] = "YOU'RE GONNA CARRY THAT WEIGHT.",
+					--Ballerina
+					["bm_w_speen"] = "Trailblazer Pivot",
 
 					--SUB2000
 					["bm_w_sub2000"] = "Kel-Tec SUB-2000",
@@ -4618,6 +4659,8 @@ Hooks:Add("LocalizationManagerPostInit", "SC_Localization_Weapons_Eng", function
 					["bm_w_hunter"] = "Avalanche CB1-50 Pistol Grip Crossbow",
 					["bm_w_elastic"] = "Hoyt Carbon Spyder ZT 30 Bow",
 					["bm_wp_elastic_body_tactic"] = "Hoyt Ignite Riser",
+
+					["bm_w_dart"] = "Pneu-Dart X-2",
 
 				--Attachments
 
@@ -5876,7 +5919,7 @@ Hooks:Add("LocalizationManagerPostInit", "SC_Localization_Skills_Eng", function(
 
 				--Transporter
 				["menu_pack_mule_beta_sc"] = "Transporter",
-				["menu_transporter_beta_desc_sc"] = "BASIC: #{owned}#$basic##\nFor every #{skill_color}#10## points of armor you have, the movement penalty for carried bags is reduced by #{skill_color}#$skill_value_b1.##\n\nACE: #{owned}#$pro##\nYour max bag carry weight is increased by #{skill_color}#$skill_value_p2.##\n\n#{risk}#NOTE: The default carry weight is 30, and the movement penalty from the bag still applies.##",
+				["menu_transporter_beta_desc_sc"] = "BASIC: #{owned}#$basic##\nFor every #{skill_color}#10## points of armor you have, the movement penalty for carried bags is reduced by #{skill_color}#$skill_value_b1.##\n\nACE: #{owned}#$pro##\nFor every #{skill_color}#10## points of armor you have, the stamina drain penalty when overencumbered by bags is reduced by #{skill_color}#$skill_value_p1.##\n\nYour max bag carry weight is increased by #{skill_color}#$skill_value_p2.##\n\n#{risk}#NOTE: The default carry weight is 30, and the movement penalty from the bag still applies.##",
 
 				--More Blood to Bleed--
 				["menu_iron_man_beta_sc"] = "More Blood to Bleed",
@@ -5897,7 +5940,7 @@ Hooks:Add("LocalizationManagerPostInit", "SC_Localization_Skills_Eng", function(
 
 				--Bulletstorm--
 				["menu_ammo_reservoir_beta_sc"] = "Bulletstorm",
-				["menu_ammo_reservoir_beta_desc_sc"] = "BASIC: #{owned}#$basic##\nAmmo bags placed by you grant its users the ability to shoot without depleting their ammunition for up to #{skill_color}#5## seconds after replenishing ammo from it.\n\nThe more ammo replenished, the longer the duration of the effect.\n\n#{risk}#NOTE:## #{important_1}#Launchers and weapons using explosive ammo## #{risk}#do not receive the effects of this skill.##\n\nACE: #{owned}#$pro##\nIncreases the maximum possible duration of the effect by an additional #{skill_color}#15## seconds.",
+				["menu_ammo_reservoir_beta_desc_sc"] = "BASIC: #{owned}#$basic##\nAmmo bags placed by you grant its users the ability to shoot without depleting their ammunition for up to #{skill_color}#5## seconds after replenishing ammo from it.\n\nThe more ammo replenished, the longer the duration of the effect.\n\n#{risk}#NOTE:## #{important_1}#Launchers, the OVE9000 Saw, and weapons using explosive ammo## #{risk}#do not receive the effects of this skill.##\n\nACE: #{owned}#$pro##\nIncreases the maximum possible duration of the effect by an additional #{skill_color}#15## seconds.",
 
 				--Specialist Equipment formally Rip and Tear
 				["menu_portable_saw_beta_sc"] = "Specialist Training",
@@ -6348,7 +6391,7 @@ Hooks:Add("LocalizationManagerPostInit", "SC_Localization_Perk_Decks_Eng", funct
 		["menu_deck18_3_desc_sc"] = "Your dodge is increased by an additional ##$perk_value_1## points.",
 		["menu_deck18_5_desc_sc"] = "Dodging an attack reduces the smoke bomb's cooldown by ##$perk_value_1## second.\n\nYou carry ##$perk_value_2## additional body bag in your inventory.",
 		["menu_deck18_7_desc_sc"] = "Your dodge is increased by an additional ##$perk_value_1## points.",
-		["menu_deck18_9_desc_sc"] = "Your dodge meter fills up by ##$perk_value_1## of your dodge every second while you are inside of your smoke screen.\n\nDeck Completion Bonus: Your chance of getting a higher quality item during a PAYDAY is increased by ##10%.##",
+		["menu_deck18_9_desc_sc"] = "Your dodge meter fills up by ##$perk_value_1## of your dodge every second while you are inside of your smoke screen.\nAllies standing in your smoke screen have their dodge meters filled up by ##$perk_value_2## instead.\n\nDeck Completion Bonus: Your chance of getting a higher quality item during a PAYDAY is increased by ##10%.##",
 
 		--Sweet liquor eases the pain--
 		["menu_deck19_1_desc_sc"] = "Unlocks the #{skill_color}#Hip Flask## for use in place of a throwable.\n\n#{skill_color}#$perk_value_1## of the damage taken to your health is applied over #{skill_color}#$perk_value_2## seconds.\n\nUsing the flask immediately negates any damage-over-time.\n\nWhenever damage-over-time is negated, you heal for #{skill_color}#$perk_value_3## of the remaining damage-over-time.\n\nThe flask has a #{important_1}#$perk_value_4## second cooldown.\n\nLose #{important_1}#$perk_value_5## of your armor and gain #{skill_color}#$perk_value_6## more health.\n\nWhile your armor is broken, your damage grace period is reduced by #{important_1}#$perk_value_7,## excluding the next hit you take when negating damage-over-time.\n#{risk}#NOTE: Your dodge grace period is unaffected.##",

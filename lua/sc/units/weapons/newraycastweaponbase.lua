@@ -964,6 +964,14 @@ function NewRaycastWeaponBase:old_update_stats_values(disallow_replenish, ammo_d
 			if stats.volley_rays then
 				self._volley_rays = stats.volley_rays
 			end
+
+			if stats.launch_speed_mul then
+				self._launch_speed_mul = stats.launch_speed_mul
+			end
+
+			if stats.charge_speed_mul then
+				self._charge_speed_mul = stats.charge_speed_mul
+			end
 		end
 	end
 
@@ -1329,6 +1337,7 @@ function NewRaycastWeaponBase:_update_stats_values(disallow_replenish, ammo_data
 			self._descope_on_fire_ignore_setting = self:weapon_tweak_data().descope_on_fire_ignore_setting
 			self._descope_on_dmg = self:weapon_tweak_data().descope_on_dmg
 			self._srm = self:weapon_tweak_data().recoil_values and self:weapon_tweak_data().recoil_values.srm
+			self._sam = self:weapon_tweak_data().recoil_values and self:weapon_tweak_data().recoil_values.sam
 			self._rms = self:weapon_tweak_data().rms
 			self._sms = self:weapon_tweak_data().sms
 			self._smt = self._sms and self:weapon_tweak_data().fire_mode_data and ((self:weapon_tweak_data().fire_mode_data.fire_rate * 5) * (self:weapon_tweak_data().smt_mult or 1))
@@ -1402,6 +1411,7 @@ function NewRaycastWeaponBase:_update_stats_values(disallow_replenish, ammo_data
 				self._burst_no_anim = burst_data.no_anim or self._burst_no_anim --only play anims for the last shot in a burst
 				self._burst_delay = burst_data.delay or self._burst_delay or 0.25
 				self._auto_burst = (burst_data.auto_burst ~= nil and burst_data.auto_burst) or self._auto_burst
+				self._slamfire  = (burst_data.slamfire ~= nil and burst_data.slamfire) or self._slamfire
 				self._block_toggle = (burst_data.block_toggle ~= nil and burst_data.block_toggle) or self._block_toggle --blocks toggling between semi-auto and full-auto; does not stop toggling off burst
 				self._lock_burst = (burst_data.lock ~= nil and burst_data.lock) or self._lock_burst --blocks toggling off burst altogether
 				self._burst_toggle_to_semi = burst_data.toggle_to_semi or self._burst_toggle_to_semi --forces toggling to semi-auto from burst; only applicable if the base firemode is full-auto
@@ -1572,6 +1582,9 @@ function NewRaycastWeaponBase:_update_stats_values(disallow_replenish, ammo_data
 				else
 					self._starwars = deep_clone(stats.starwars)
 				end
+			end
+			if stats.battery_mag then
+				self._starwars = deep_clone(stats.battery_mag)
 			end
 			if stats.use_silenced_muzzleflash then
 				self._use_silenced_muzzleflash = true
@@ -1846,7 +1859,7 @@ function NewRaycastWeaponBase:should_reload_immediately()
 end
 
 function NewRaycastWeaponBase:tweak_data_anim_play(anim, speed_multiplier, set_offset, set_offset2)
-	if anim ~= "deploy" and anim ~= "undeploy" and self._starwars and not self._starwars.can_reload then return end
+	if anim ~= "deploy" and anim ~= "undeploy" and self._starwars and (not self._starwars.can_reload and not self._starwars.allow_anims) then return end
 
 	if anim == "reload_slap" then
 		speed_multiplier = self._current_reload_speed_multiplier or self:reload_speed_multiplier()
@@ -1935,9 +1948,8 @@ end
 
 
 function NewRaycastWeaponBase:tweak_data_anim_offset(anim, offset, second_gun)
-	if self._starwars and not self._starwars.can_reload then
-		return
-	end
+	if self._starwars and (not self._starwars.can_reload and not self._starwars.allow_anims) then return end
+	
 	local unit_anim = anim
 	local data = tweak_data.weapon.factory[self._factory_id]
 	if second_gun and alive(self._second_gun) then
@@ -2300,9 +2312,10 @@ end
 function NewRaycastWeaponBase:enter_steelsight_speed_multiplier( mult_only )
 	local multiplier = 1
 	local ads_time = self:weapon_tweak_data().ads_speed or 0.200
+	local base_transition_dur = tweak_data.player.TRANSITION_DURATION
 
 	if not mult_only then
-		multiplier = multiplier / ( ads_time / tweak_data.player.TRANSITION_DURATION)
+		multiplier = multiplier / ( ads_time / base_transition_dur)
 		multiplier = multiplier / self._ads_speed_mult / self:second_sight_steelsight_mult()
 	end
 
@@ -2316,6 +2329,16 @@ function NewRaycastWeaponBase:enter_steelsight_speed_multiplier( mult_only )
 	end
 	
 	multiplier = multiplier / ( 1 + 1 - managers.player:upgrade_value("weapon", "enter_steelsight_speed_multiplier", 1))
+
+	local fatty = managers.player and managers.player._fat_fuck
+	if fatty and not mult_only then
+		local current_ads_time = base_transition_dur / multiplier
+		local penalty_cap = 0.8
+		if current_ads_time < penalty_cap then
+			ads_time = math.min(ads_time + 0.5, penalty_cap)
+		end
+		multiplier = base_transition_dur / ads_time
+	end
 	
 	return multiplier
 end
@@ -2430,7 +2453,7 @@ function NewRaycastWeaponBase:get_damage_falloff(damage, col_ray, user_unit, dot
 	--Initialize base info.
 
 	local has_mindblown_ace = managers.player:has_category_upgrade("player", "headshot_no_falloff") and self:is_single_shot() and self:is_category("assault_rifle", "snp") and check_col_ray_head --and (managers.player._last_no_falloff_headshot_t or 0) < self._unit:timer():time()
-	if (self._chf and check_col_ray_head) or --[[not self:in_burst_mode() and not is_rapidfire and]] (not ignore_ammo and self._ammo_data and (self._ammo_data.bullet_class == "InstantExplosiveBulletBase")) or has_mindblown_ace then
+	if (self._chf and check_col_ray_head) or --[[not self:in_burst_mode() and not is_rapidfire and]] (not ignore_ammo and self._ammo_data and (self._ammo_data.bullet_class == "InstantExplosiveBulletBase")) or has_mindblown_ace or self:weapon_tweak_data().no_falloff then
 		--if has_mindblown_ace then
 			--managers.player._last_no_falloff_headshot_t = self._unit:timer():time() + (tweak_data.upgrades.headshot_no_falloff_cd or 0)
 		--end
@@ -2957,6 +2980,12 @@ Hooks:PostHook(NewRaycastWeaponBase, "weapon_tweak_data", "res_weapon_tweak_data
 
 	if not self._parts then
 		return wtd
+	end
+
+	if self._name_id == "ar23" and self._parts then
+		local is_carbine = self._parts.wpn_fps_ck_ar23a
+		local has_drum = self._parts.wpn_fps_ass_ar23_m_drum
+		wtd.animations.reload_name_id = "ar23" .. ((is_carbine and "a") or "") .. ((has_drum and "_drum") or "")
 	end
 
 	if not g3_niphen and BeardLib.Utils:FindMod("JustAnotherG3 Reload") and self._name_id == "g3" then

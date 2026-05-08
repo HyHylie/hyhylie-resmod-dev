@@ -1569,7 +1569,7 @@ Hooks:Add("LocalizationManagerPostInit", "SC_Localization_Eng", function(loc)
 		["bm_pdw_gen_sc_desc"] = "#{skill_color}#무기 피해량의 75%가 방탄복을 관통하여 들어갑니다.##",
 		["bm_heavy_ap_weapon_sc_desc"] = "#{skill_color}#다수의 적, 방탄복, 방패, 타이탄 방패, 그리고 얇은 벽을 관통할 수 있습니다.##",
 		["bm_heavy_ap_no_mult_weapon_sc_desc"] = "#{skill_color}#다수의 적, 방탄복, 방패, 타이탄 방패, 그리고 얇은 벽을 관통할 수 있습니다.##",
-		["bm_integral_suppressor_desc"] = "#{skill_color}#소음기가 일체형으로## 장착되어 있습니다.",
+		["bm_integral_suppressor_desc"] = "#{skill_color}#일체형 소음기##가 장착되어 있습니다.",
 
 		["bm_bow_sc_desc"] = "#{skill_color}#$BTN_FIRE## 키를 누르고 있으면 화살을 당기고, 놓는 순간 발사됩니다.\n화살을 최대한 당길수록 화살의 피해량과 속도가 증가합니다.\n\n#{skill_color}#$BTN_AIM## 키을 누르면 당겨진 화살를 놓습니다.\n\n화살은 주워서 회수할 수 있습니다.\n#{skill_color}#방탄복을 관통할 수 있습니다.##",
 		["bm_bow_exp_sc_desc"] = "#{skill_color}#$BTN_FIRE## 키를 누르고 있으면 화살을 당기고, 놓는 순간 발사됩니다.\n화살을 최대한 당길수록 화살의 속도가 빨라집니다.\n\n#{skill_color}#$BTN_AIM## 키을 누르면 당겨진 화살를 놓습니다.\n\n#{risk}#화살은 목표에 적중 시 폭발하며, 피해는 화살과 폭발로 나뉩니다.##",
@@ -1932,7 +1932,12 @@ Hooks:Add("LocalizationManagerPostInit", "SC_Localization_Eng", function(loc)
 		["bm_melee_revenant_heirloom"] = "망자의 낫",
 		["bm_melee_revenant_heirloom_info"] = "#{important_1}#\"날 가까이서 보면 이미 늦은 거라고, 고깃덩어리.\"##",
 		--best girl
-		["bm_melee_megumins_staff_info"] = "완전히 충전되면 강력한 폭발을 일으킵니다!\n모든 표면이나 존재에게 최대 #{skill_color}#30##미터까지 시전할 수 있지만, #{risk}#공중에는 시전할 수 없습니다.##\n\n#{important_1}#충전 속도는 스킬의 영향을 받지 않습니다.\n충전하면 시야가 왜곡되고, 스태미나가 소모되며, 움직임이 점점 느려집니다.\n만일 성공적으로 폭발을 시전했다면 즉시 쓰러지며, 쓰러지는 것을 지연시키거나 막아주는 스킬과 특성 덱 효과는 무시됩니다.##",
+		["bm_melee_megumins_staff_info"] = "완전히 충전되면 강력한 폭렬 마법을 시전합니다!\n모든 표면이나 존재에게 최대 #{skill_color}#30##미터까지 시전할 수 있지만, #{risk}#공중에는 시전할 수 없습니다.##\n\n#{important_1}#충전 속도는 스킬의 영향을 받지 않습니다.\n충전하는 동안 달리기가 불가능해지고, 시야가 왜곡되며 스태미나가 소모되고, 이동 속도가 점점 느려집니다.\n성공적으로 폭렬 마법을 시전했다면 즉시 쓰러지며, 쓰러지는 것을 지연시키거나 막아주는 스킬과 특성 덱 효과는 무시됩니다.##",
+		--ISEKAI
+		["bm_melee_sakura_dork_info"] = "로켓 배송 요청 받았습니다!\n\n완전히 충전한 후 휘두르면 트럭 씨를 소환합니다.\n\n#{important_1}#충전 속도는 스킬의 영향을 받지 않습니다.\n충전하거나 공격하는 동안 달릴 수 없습니다.##",		
+		--Makarov (Strix)
+		["bm_pmm_sc_desc"] = "이 소련제 권총은 오늘날까지도 전 세계 전장에서 사용되고 있습니다. 작은 크기 덕분에 숨기기에도 좋지만, 라우드에서도 강력한 화력을 발휘합니다.",
+		["bm_x_pmm_sc_desc"] = "",
 		--fishe
 		["bm_melee_holy_mackerel_info"] = "#{item_stage_2}#레벨 42 생선##\n\n물고기에게 맞으면 아주 창피할 겁니다.",
 
@@ -2138,6 +2143,7 @@ Hooks:Add("LocalizationManagerPostInit", "SC_Localization_Eng", function(loc)
 		["bm_menu_btn_sell"] = "무기 판매 ($price)",
 		["bm_menu_btn_buy_selected_weapon"] = "무기 구매 ($price)",
 
+		["menu_persecond_suffix_short"] = "/s",
 		["menu_milliseconds_suffix_short"] = "ms", --milliseconds
 		["menu_meters_suffix_short"] = "m", --meters
 
@@ -2157,6 +2163,21 @@ Hooks:Add("LocalizationManagerPostInit", "SC_Localization_Eng", function(loc)
 		["bm_menu_damage_min"] = "최소 피해량",
 		["bm_menu_moving_range"] = "피해량 감소 종점",
 
+		--Throwables
+		["bm_menu_damage_blast"] = "피해량 (폭발)",
+		["bm_menu_range_blast"] = "범위 (폭발)",
+		["bm_menu_time_blast"] = "지속 시간 (폭발)",
+		["bm_menu_damage_impact"] = "피해량 (직격)",
+		["bm_menu_range_impact"] = "범위 (직격)",
+		["bm_menu_damage_pool"] = "피해량 (지대)",
+		["bm_menu_range_pool"] = "범위 (지대)",
+		["bm_menu_time_pool"] = "지속 시간 (지대)",
+		["bm_menu_damage_dot"] = "피해량 (지속 피해)",
+		["bm_menu_range_dot"] = "범위 (지속 피해)",
+		["bm_menu_time_dot"] = "지속 시간 (지속 피해)",
+		["bm_menu_cooldown_reduction"] = "재충전 절감",
+
+		--Melee
 		["bm_menu_attack_speed"] = "반복 지연",
 		["bm_menu_impact_delay"] = "타격 지연",
 		["bm_menu_cleave"] = "휩쓸기 수",
@@ -2642,11 +2663,12 @@ Hooks:Add("LocalizationManagerPostInit", "SC_Localization_Weapons_Eng", function
 					["bm_wp_raygun_o_waw_desc"] = "콜 오브 듀티: 블랙 옵스 II 이전과 같은 방식으로 기계식 조준기의 정렬을 변경합니다.",
 
 			--[[ PISTOLS ]]
+				["bm_welrod_sc_desc"] = "바이크 펌프처럼 생긴 이 잠입용 소형 권총은 홀로 있는 목표를 조용히 암살할 수 있습니다. #{skill_color}#일체형 소음기##가 장착되어 있습니다.",
 				--Gecko Pistol
-				["bm_tranq_maxim_sc_desc"] = "세계 최초로 상업적으로 출시된 #{skill_color}#일체형 소음##가 장착된 반자동 권총으로, 쇠약하게 만드는 마취탄을 사용하고 조작성과 은폐성이 뛰어납니다.\n\n#{stats_positive}#마취탄을 발사해 2초간 30의 피해를 가합니다.##",
-				["bm_tranq_maxim_auto_sc_desc"] = "세계 최초로 상업적으로 출시된 #{skill_color}#일체형 소음##가 장착된 반자동 권총 한 쌍으로, 쇠약하게 만드는 마취탄을 사용하고 조작성과 은폐성이 뛰어납니다.\n\n#{stats_positive}#마취탄을 발사해 2초간 30의 피해를 가합니다.##\n#{risk}#지속 시간은 사거리에 따라 감소합니다.##",
+				["bm_tranq_maxim_sc_desc"] = "세계 최초로 상업적으로 출시된 #{skill_color}#일체형 소음기##가 장착된 반자동 권총으로, 쇠약하게 만드는 마취탄을 사용하고 조작성과 은폐성이 뛰어납니다.\n\n#{stats_positive}#마취탄을 발사해 2초간 30의 피해를 가합니다.##",
+				["bm_tranq_maxim_auto_sc_desc"] = "세계 최초로 상업적으로 출시된 #{skill_color}#일체형 소음기##가 장착된 반자동 권총 한 쌍으로, 쇠약하게 만드는 마취탄을 사용하고 조작성과 은폐성이 뛰어납니다.\n\n#{stats_positive}#마취탄을 발사해 2초간 30의 피해를 가합니다.##\n#{risk}#지속 시간은 사거리에 따라 감소합니다.##",
 
-				["bm_tranq_x_maxim_sc_desc"] = "세계 최초로 상업적으로 출시된 #{skill_color}#일체형 소음##가 장착된 반자동 권총 한 쌍으로, 쇠약하게 만드는 마취탄을 사용하고 조작성과 은폐성이 뛰어납니다.\n\n#{stats_positive}#마취탄을 발사해 2초간 30의 피해를 가합니다.##",
+				["bm_tranq_x_maxim_sc_desc"] = "세계 최초로 상업적으로 출시된 #{skill_color}#일체형 소음기##가 장착된 반자동 권총 한 쌍으로, 쇠약하게 만드는 마취탄을 사용하고 조작성과 은폐성이 뛰어납니다.\n\n#{stats_positive}#마취탄을 발사해 2초간 30의 피해를 가합니다.##",
 				--Igor (APS)
 				["bm_stech_sc_desc"] = "더 무겁고 발사 속도가 느린 기관권총으로, 휴대성이 떨어져 선호도가 떨어졌습니다. 무거운 무게 덕분에 은폐성을 희생한 대신 더 나은 반동 제어가 가능합니다.",
 				["bm_x_stech_sc_desc"] = "더 무겁고 발사 속도가 느린 기관권총으로, 휴대성이 떨어져 선호도가 떨어졌습니다. 무거운 무게 덕분에 은폐성을 희생한 대신 더 나은 반동 제어가 가능합니다.",
@@ -2700,6 +2722,8 @@ Hooks:Add("LocalizationManagerPostInit", "SC_Localization_Weapons_Eng", function
 				--Baby Deagle--
 				["bm_sparrow_sc_desc"] = "다음에 보자고, 스페이스 카우보이...",
 				["bm_w_sparrow_sc_g_cowboy_desc"] = "그 무게을 짊어지고 살아라.",
+				--Ballerina 9mm (Pivot PCC)
+				["bm_speen_sc_desc"] = "권총탄을 사용하는 이 카빈은 사용하지 않을 때 깔금하게 접을 수 있어 휴대가 간편한 덕분에 잠복 요원 사이에서 선호도가 높습니다.",				
 				--socom deez nuts--
 				["bm_w_socom_desc"] = "자칼이 사용하는 권총입니다. 스타일리시한 디자인의 안정적이고 강력한 .45ACP 권총이죠.",
 				["bm_wp_wpn_fps_upg_fl_pis_socomlam"] = "라 결합 모듈",
@@ -2747,7 +2771,6 @@ Hooks:Add("LocalizationManagerPostInit", "SC_Localization_Weapons_Eng", function
 				["bm_rsh12_sc_iw_desc"] = "3점사 탄도 권총. 빠른 3점사 사격이 가능한 삼중 약실 구조를 갖추고 있습니다.\n\n#{skill_color}#방탄복, 다수의 적, 방패, 그리고 얇은 벽을 관통할 수 있습니다.##",
 				--SAA/Peacemaker
 				["bm_ap_weapon_peacemaker_sc_desc"] = "#{risk}#역사상 가장 뛰어난 권총.##\n\n#{skill_color}#방탄복, 다수의 적, 방패, 그리고 얇은 벽을 관통할 수 있는## 특수 .45구경 탄이 장전되어 있습니다.\n\n#{important_1}#반동이 증가하고 유효 사거리가 감소하며 조준이 불가능해지는 대신## #{skill_color}#발사 속도가 증가하는## 팬링을 할 수 있습니다.",
-				--SAA/Peacemaker
 				["bm_wp_peacemaker_rifle_stock_desc"] = "해머를 팬링하는 도중에도 조준이 가능합니다.",				
 				--CUSTOM PISTOLS
 					--Px4 Storm
@@ -3048,6 +3071,9 @@ Hooks:Add("LocalizationManagerPostInit", "SC_Localization_Weapons_Eng", function
 					["bm_mod3_sc_desc"] = "Valkyria 소총을 특별히 개조하여 인체공학적 설계로 개선하고 크기를 줄인 모델로, 핀란드 만의 러시아 해안 근처 지역에 벌어진 PMC 간의 무력 충돌에서 눈에 띄게 사용되었습니다.\n\n#{skill_color}#일체형 소음기##가 장착되어 있고 #{skill_color}#무기 피해량의 25%가 방탄복을 관통하여 가합니다.##",
 					-- Malyuk
 					["bm_wp_wpn_fps_ass_malima_xmag"] = "45발 탄창",
+					-- MW2 (2009 M4)
+					["bm_wp_wpn_fps_ass_noobtube_so_mw2"] = "모던2 (2009년) 볼트",
+					["bm_wp_wpn_fps_ass_noobtube_so_mw3"] = "모던3 (2011년) 볼트",					
 
 			--[[ DMRs ]]
 				--Little Friend
@@ -3205,9 +3231,13 @@ Hooks:Add("LocalizationManagerPostInit", "SC_Localization_Weapons_Eng", function
 					["bm_wp_upg_a_dl_a_cyanide_desc"] = "시안화물이 첨가된 총알은 2차 세계대전 당시 독일의 소음기 장착 볼트 액션 소총에서 영감을 받았습니다.\n\n이 탄은 #{skill_color}#목표 적중 이후 5초 후에 350의 피해를 가합니다.##\n\n#{important_1}#더 이상 추가 헤드샷 데미지를 가하지 않으며, 적을 관통할 수 없습니다.##",
 					["bm_dl_cyanide_desc"] = "#{stats_positive}#몇 초 후에 큰 피해를 가히는 시안화물이 첨가된 탄환을 발사하고## #{skill_color}#방탄복, 방패, 얇은 벽을 관통할 수 있습니다.##",
 					--SVT-40
-					["bm_wp_upg_i_avt40_desc"] = "#{risk}#완전 자동 발사##가 가능한 개조된 내부 장치.\n그리고 당신은 M308이 반동 제어가 어려웠다고 생각할 것입니다.",
+					["bm_wp_upg_i_avt40_desc"] = "#{risk}#완전 자동 발사##가 가능하게 개조된 부품이 장착되어 있습니다.\n그리고 M308가 다루기 힘들다고 생각하겠죠.",
+					--Stalker Gauss Rifle
+					["bm_w_gauss_gun_desc"] = "이 저격 소총은 존에서 개발되었고 전자기 탄도 가속 시스템을 탑재하고 있으며 존에서만 사용합니다.\n\n#{skill_color}#다수의 적, 방탄복, 방패, 타이탄 방패, 그리고 얇은 벽을 관통할 수 있습니다.##",					
 
 			--[[ SPECIALS ]]
+				--Dart Gun
+				["bm_dart_sc_desc"] = "방심한 목표물에 매우 강력한 다트를 발사할 수 있는 조용하고 활용도가 높은 무기입니다.\n\n강력한 #{stats_positive}#독 다트##가 기본 장착되어 있으며, 상황에 맞춰 #{ghost_color}#안정제 다트## 또는 #{stat_maxed}#소생자극제 다트##로 교체할 수 있습니다.",			
 				--Saw
 				["bm_ap_saw_sc_desc"] = "#{skill_color}#방탄복을 뚫고 썰어버릴 수 있습니다.##",
 				["bm_ap_saw_blade_sc_desc"] = "칼날을 날카롭게 하여 #{skill_color}#방탄복을 관통할 수 있습니다.##",
@@ -3276,6 +3306,8 @@ Hooks:Add("LocalizationManagerPostInit", "SC_Localization_Weapons_Eng", function
 					--PPK (Gruber)
 					["bm_w_ppk"] = "Gruber Kurz",
 					["bm_w_x_ppk"] = "아킴보 Gruber Kurze",
+					["bm_w_pmm"] = "Strix",
+					["bm_w_x_pmm"] = "아킴보 Strix",					
 					--M13
 					["bm_w_legacy"] = "M13",
 					["bm_w_x_legacy"] = "아킴보 M13",
@@ -3314,6 +3346,8 @@ Hooks:Add("LocalizationManagerPostInit", "SC_Localization_Weapons_Eng", function
 					--Baby Deagle--
 					["bm_w_sparrow"] = "Sparrow 941",
 					["bm_w_x_sparrow"] = "스파이크 & 비서스",
+					--Ballerina
+					["bm_w_speen"] = "Ballerina 9mm",					
 					--Crosskill
 					["bm_w_colt_1911"] = "Crosskill Operator II",
 					["bm_w_x_1911"] = "머스탱 & 섈리",
@@ -3838,8 +3872,12 @@ Hooks:Add("LocalizationManagerPostInit", "SC_Localization_Weapons_Eng", function
 					["bm_w_x_stech"] = "아킴보 Stechkin",
 					--Gruber
 					["bm_w_ppk"] = "Walther PPK/S",
+					["bm_w_x_ppk"] = "아킴보 PPK",					
 					["bm_wp_pis_ppk_g_laser"] = "크림슨 트레이스 레이저 손잡이",
 					["bm_wp_pis_ppk_b_long"] = "PPKS 슬라이드",
+					--Strix (Makarov)
+					["bm_w_pmm"] = "Makarov PM",
+					["bm_w_x_pmm"] = "아킴보 Makarov",					
 					--Chimano 88
 					["bm_w_glock_17"] = "Glock 17",
 					["bm_w_x_g17"] = "아킴보 Glock 17",
@@ -3898,7 +3936,8 @@ Hooks:Add("LocalizationManagerPostInit", "SC_Localization_Weapons_Eng", function
 					["bm_wp_sparrow_body_941"] = "IWI Jericho 941F 키트",
 					["bm_wp_sparrow_g_cowboy"] = "가중 손잡이",
 					["bm_wp_sparrow_g_cowboy_desc"] = "그 무게을 짊어지고 살아라.",
-
+					--Ballerina
+					["bm_w_speen"] = "Trailblazer Pivot",					
 					--SUB2000
 					["bm_w_sub2000"] = "Kel-Tec SUB-2000",
 					["bm_sub2000_sc_desc"] = "지금까지 만들어진 총 중 하나. 작은 권총탄은 긴 총열에서 발사할 때 훨씬 더 세게 맞추며 접이식 기능 덕분에 괜찮은 은폐력을 제공하죠.",
@@ -4547,6 +4586,8 @@ Hooks:Add("LocalizationManagerPostInit", "SC_Localization_Weapons_Eng", function
 					["bm_w_hunter"] = "Avalanche CB1-50 Pistol Grip Crossbow",
 					["bm_w_elastic"] = "Hoyt Carbon Spyder ZT 30 Bow",
 					["bm_wp_elastic_body_tactic"] = "Hoyt Ignite Riser",
+
+					["bm_w_dart"] = "Pneu-Dart X-2",
 
 				--Attachments
 
@@ -5805,7 +5846,7 @@ Hooks:Add("LocalizationManagerPostInit", "SC_Localization_Skills_Eng", function(
 
 				--Transporter
 				["menu_pack_mule_beta_sc"] = "트랜스포터",
-				["menu_transporter_beta_desc_sc"] = "베이식: #{owned}#$basic##\n가방 운반 시 이동 속도 패널티가 보유한 방탄량 #{skill_color}#10##당 #{skill_color}#$skill_value_b1##씩 감소합니다.\n\n에이스: #{owned}#$pro##\n가방을 운반할 수 있는 최대 무게량이 #{skill_color}#$skill_value_p2## 증가합니다.\n\n#{risk}#참고: 기본 운반 무게량은 30이며, 가방 운반 시의 이동 속도 패널티는 여전히 적용됩니다.##",
+				["menu_transporter_beta_desc_sc"] = "베이식: #{owned}#$basic##\n가방 운반 시 이동 속도 패널티가 보유한 방탄량 #{skill_color}#10##당 #{skill_color}#$skill_value_b1##씩 감소합니다.\n\n에이스: #{owned}#$pro##\n가방 과적 운반 시 스태미나 소모 패널티가 보유한 방탄량 #{skill_color}#10##당 #{skill_color}#$skill_value_p1##씩 감소합니다.\n\n가방을 운반할 수 있는 최대 무게량이 #{skill_color}#$skill_value_p2## 증가합니다.\n\n#{risk}#참고: 기본 운반 무게량은 30이며, 가방 운반 시의 이동 속도 패널티는 여전히 적용됩니다.##",
 
 				--More Blood to Bleed--
 				["menu_iron_man_beta_sc"] = "아직 흘릴 피가 남아 있어",
@@ -5826,7 +5867,7 @@ Hooks:Add("LocalizationManagerPostInit", "SC_Localization_Skills_Eng", function(
 
 				--Bulletstorm--
 				["menu_ammo_reservoir_beta_sc"] = "탄환 폭풍",
-				["menu_ammo_reservoir_beta_desc_sc"] = "베이식: #{owned}#$basic##\n당신이 설치한 탄약 가방을 사용한 플레이어는 탄약을 보충한 이후 최대 #{skill_color}#5##초간 탄약 소모 없이 무기를 발사할 수 있습니다.\n\n보충하는 탄약량이 많을수록 지속 시간이 길어집니다.\n\n#{risk}#주의:## #{important_1}#발사기 및 폭발성 탄약을 사용하는 무기는## #{risk}#해당 스킬 효과를 받지 않습니다.##\n\n에이스: #{owned}#$pro##\n효과의 최대 지속 시간이 추가로 #{skill_color}#15##초 증가합니다.",
+				["menu_ammo_reservoir_beta_desc_sc"] = "베이식: #{owned}#$basic##\n당신이 설치한 탄약 가방을 사용한 플레이어는 탄약을 보충한 이후 최대 #{skill_color}#5##초간 탄약 소모 없이 무기를 발사할 수 있습니다.\n\n보충하는 탄약량이 많을수록 지속 시간이 길어집니다.\n\n#{risk}#주의:## #{important_1}#발사기, OVE9000 톱 및 폭발성 탄약을 사용하는 무기는## #{risk}#해당 스킬 효과를 받지 않습니다.##\n\n에이스: #{owned}#$pro##\n효과의 최대 지속 시간이 추가로 #{skill_color}#15##초 증가합니다.",
 
 				--Specialist Equipment formally Rip and Tear
 				["menu_portable_saw_beta_sc"] = "전문가 훈련",
@@ -6068,7 +6109,7 @@ Hooks:Add("LocalizationManagerPostInit", "SC_Localization_Skills_Eng", function(
 
 				--Frenzy--
 				["menu_wolverine_beta_sc"] = "광분",
-				["menu_wolverine_beta_desc_sc"] = "베이식: #{owned}#$basic##\n체력이 최대치에 가까울수록 회복량이 최대 #{important_1}$skill_value_b2##까지 감소합니다.\n\n쓰러질 수록 방어력이 최대 #{skill_color}#$skill_value_b1##까지 증가합니다.\n\n방어력은 최대 #{skill_color}#$deflection##까지 받는 체력 피해를 감소시키며, 다른 피해 감소 효과가 적용된 후 적용됩니다.\n\n에이스: #{owned}#$pro##\n회복량이 최대 #{important_1}#$skill_value_p2##까지 감소하지만, 방어력은 최대 #{skill_color}#$skill_value_p1##까지 증가합니다.",
+				["menu_wolverine_beta_desc_sc"] = "베이식: #{owned}#$basic##\n체력이 최대치에 가까울수록 회복량이 최대 #{important_1}#$skill_value_b2##까지 감소합니다.\n\n쓰러질 수록 방어력이 최대 #{skill_color}#$skill_value_b1##까지 증가합니다.\n\n방어력은 최대 #{skill_color}#$deflection##까지 받는 체력 피해를 감소시키며, 다른 피해 감소 효과가 적용된 후 적용됩니다.\n\n에이스: #{owned}#$pro##\n회복량이 최대 #{important_1}#$skill_value_p2##까지 감소하지만, 방어력은 최대 #{skill_color}#$skill_value_p1##까지 증가합니다.",
 
 				--Berserker--
 				["menu_frenzy_sc"] = "버서커",
@@ -6277,7 +6318,7 @@ Hooks:Add("LocalizationManagerPostInit", "SC_Localization_Perk_Decks_Eng", funct
 		["menu_deck18_3_desc_sc"] = "회피율이 추가로 ##$perk_value_1## 증가합니다.",
 		["menu_deck18_5_desc_sc"] = "공격을 회피하면 연막탄의 재사용 대기 시간이 ##$perk_value_1##초 감소합니다.\n\n인벤토리에 시체 가방을 ##$perk_value_2##개 더 소지합니다.",
 		["menu_deck18_7_desc_sc"] = "회피율이 추가로 ##$perk_value_1## 증가합니다.",
-		["menu_deck18_9_desc_sc"] = "연막 속에 숨어 있을 동안 회피 미터가 초당 ##$perk_value_1##씩 채워집니다.\n\n덱 완료 보너스: PAYDAY 카드에서 높은 등급의 아이템을 얻을 확률이 ##10%## 상승합니다.",
+		["menu_deck18_9_desc_sc"] = "연막 속에 숨어 있을 동안 회피 미터가 초당 ##$perk_value_1##씩 채워집니다.\n연막 속에 있는 동료는 회피 게이지를 ##$perk_value_2## 채워집니다.\n\n덱 완료 보너스: PAYDAY 카드에서 높은 등급의 아이템을 얻을 확률이 ##10%## 상승합니다.",
 
 		--Sweet liquor eases the pain--
 		["menu_deck19_1_desc_sc"] = "투척 무기 대신 사용할 수 있는 #{skill_color}#힙 플라스크##가 잠금 해제됩니다.\n\n받은 피해의 #{skill_color}#$perk_value_1##가 #{skill_color}#$perk_value_2##초에 걸쳐 받습니다.\n\n플라스크를 사용하면 누적 피해를 즉시 무효화시킵니다.\n\n누적 피해가 무효화될 때, 남은 지속 피해의 #{skill_color}#$perk_value_3##만큼 회복합니다.\n\n플라스크는 #{important_1}#$perk_value_4##초의 재사용 대기 시간이 있습니다.\n\n방탄량이 #{important_1}#$perk_value_5## 감소하고 체력이 #{skill_color}#$perk_value_6## 증가합니다.\n\n방탄복이 파괴되었을때, 피해 유예 시간이 #{important_1}#$perk_value_7## 감소하지만 지속 피해를 무효화할 때 받는 다음 피해는 제외됩니다.\n#{risk}#주의: 회피 유예 시간은 영향을 받지 않습니다.##",

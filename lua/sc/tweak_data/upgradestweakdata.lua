@@ -173,7 +173,8 @@ Hooks:PostHook(UpgradesTweakData, "init", "ResLevelTableInit", function(self, tw
 					"cs",
 					"brick",
 					"ostry",
-					"r700"
+					"r700",
+					"laser_watch"
 				}
 			},
 		l24 = {
@@ -237,7 +238,12 @@ Hooks:PostHook(UpgradesTweakData, "init", "ResLevelTableInit", function(self, tw
 					"shuno",
 					"holt",
 					"x_holt",
-					"x_korth"
+					"x_korth",
+					"welrod",
+					"pmm",
+					"x_pmm",
+					"speen",
+					"dart"
 				}
 			},
 		l32 = {
@@ -533,23 +539,23 @@ Hooks:PostHook(UpgradesTweakData, "_init_pd2_values", "ResSkillsInit", function(
 		0.3,
 		0.1
 	}
-	self.values.player.body_armor.stamina = { --increments of 0.025
+	self.values.player.body_armor.stamina = { --*increments of 0.0125
 		1,
-		0.975,
+		0.975, --2 increments
+		0.9625,
 		0.95,
-		0.925,
-		0.875,
-		0.85,
-		0.8
+		0.925, --2 increments
+		0.9, --2 increments
+		0.875 --2 increments
 	}
 	self.values.player.body_armor.skill_ammo_mul = { --repurposed to pick up mult
-		0.875,
-		0.95,
-		1.00,
-		1.05,
-		1.075,
-		1.125,
-		1.15
+		0.9, --Suit
+		0.95, --LBV
+		1.00, --BV
+		1.075, --HBV
+		1.075, --FJ
+		1.125, --CTV
+		1.125 --ICTV
 	}
 	self.values.player.armor_pickup_mul = {true}
 	self.max_deflection = 0.60
@@ -615,6 +621,42 @@ Hooks:PostHook(UpgradesTweakData, "_init_pd2_values", "ResSkillsInit", function(
 	self.values.team.crew_ai_ap_ammo = {
 		1.25
 	}
+	
+	-- Extra Cable ties from bots
+	self.values.team.crew_ai_cable_ties = {
+		{
+			2,
+			3,
+			4
+		}
+	}
+	
+	-- Cortex Bomb for Bots 
+	self.values.team.crew_ai_flashbang = {
+		{
+			360,
+			240,
+			120
+		}
+	}
+	
+	-- Counter Strike for Bots
+	self.values.team.crew_ai_counter_strike = {
+		{
+			360,
+			240,
+			120
+		}
+	}
+	
+	-- Shockproof for Bots
+	self.values.team.crew_ai_counter_tase = {
+		{
+			180,
+			120,
+			60
+		}
+	}	
 	
 	--Equipment--
 	--FAKS: Intended to offer on-demand burst healing that can save people from going down.
@@ -1066,12 +1108,15 @@ Hooks:PostHook(UpgradesTweakData, "_init_pd2_values", "ResSkillsInit", function(
 			--Transporter
 				--Basic
 					self.values.player.armor_carry_bonus = {1.005}
+
 				--Ace
+					self.values.player.armor_carry_stamina_drain_reduction = {1.05}
 					self.values.carry.movement_penalty_nullifier = {true}
 					self.values.carry.increased_carry_weight = {0.1}
 					
 					self.skill_descs.pack_mule = {
 						skill_value_b1 = tostring(math.ceil(self.values.player.armor_carry_bonus[1] % 1)/2).."%", -- Reducing movement penalty
+						skill_value_p1 = tostring(math.ceil(self.values.player.armor_carry_stamina_drain_reduction[1] % 1)/2).."%", -- Reduce overweight stamina drain penalty
 						skill_value_p2 = tostring(self.values.carry.increased_carry_weight[1] * 100) -- Increased Carry Weight)
 					}
 
@@ -2141,8 +2186,8 @@ Hooks:PostHook(UpgradesTweakData, "_init_pd2_values", "ResSkillsInit", function(
 	
 	--Crew Chief
 	self.values.team.stamina.passive_multiplier = {
-		1.5,
-		1.3
+		1.3,
+		1.5
 	}
 	self.values.team.armor.multiplier = {1.05}
 	self.values.team.health.passive_multiplier = {1.05}
@@ -2769,6 +2814,7 @@ Hooks:PostHook(UpgradesTweakData, "_init_pd2_values", "ResSkillsInit", function(
 	--sicario
 	self.smoke_screen_armor_regen = {2.0} --Multiplier for armor regen speed.
 	self.values.player.sicario_multiplier = {0.4} --Multiplier for dodge gained per second while inside grenade.
+	self.values.player.smoke_screen_ally_dodge_bonus = {0.2} --Multiplier for dodge gained per second for allies while inside the Sicario's smoke.
 	self.values.player.bomb_cooldown_reduction = {1} --Cooldown reduction on smoke bomb for dodging.
 	
 	--alcoholism is no joke
@@ -3177,7 +3223,7 @@ Hooks:PostHook(UpgradesTweakData, "_init_pd2_values", "ResSkillsInit", function(
 		perk_value_1 = tostring(self.values.player.passive_health_multiplier[2] % 1 * 100).."%" -- HP increase
 	}
 	self.specialization_descs[1][3] = {
-		perk_value_1 = tostring(self.values.team.stamina.passive_multiplier[1] % 1 * 100).."%", -- Stamina increase (for everyone)
+		perk_value_1 = tostring(self.values.team.stamina.passive_multiplier[2] % 1 * 100).."%", -- Stamina increase (for everyone)
 		perk_value_2 = tostring(self.values.player.passive_intimidate_range_mul[1] % 1 * 100).."%", -- Shout distance increase
 		perk_value_3 = tostring(self.values.player.passive_dodge_chance[1] * 100) -- Passive dodge increase
 	}
@@ -3767,7 +3813,8 @@ Hooks:PostHook(UpgradesTweakData, "_init_pd2_values", "ResSkillsInit", function(
 		perk_value_1 = tostring((self.values.player.passive_dodge_chance[3] - self.values.player.passive_dodge_chance[2]) * 100) -- Another additional dodge
 	}
 	self.specialization_descs[18][9] = {
-		perk_value_1 = tostring(self.values.player.sicario_multiplier[1] * 100).."%" -- Dodge regen while you inside the smoke screen
+		perk_value_1 = tostring(self.values.player.sicario_multiplier[1] * 100).."%", -- Dodge regen while you inside the smoke screen
+		perk_value_2 = tostring(self.values.player.smoke_screen_ally_dodge_bonus[1] * 100).."%" -- Dodge regen for allies inside your smoke screen
 	}
 	
 	--Stoic
@@ -4456,6 +4503,15 @@ function UpgradesTweakData:_player_definitions()
 		upgrade = {
 			value = 1,
 			upgrade = "scaling_pickup_area",
+			category = "player"
+		}
+	}
+	self.definitions.player_armor_carry_stamina_drain_reduction = {
+		name_id = "menu_armor_carry_stamina_drain_reduction_addition",
+		category = "feature",
+		upgrade = {
+			value = 1,
+			upgrade = "armor_carry_stamina_drain_reduction",
 			category = "player"
 		}
 	}	
